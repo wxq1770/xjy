@@ -1,0 +1,83 @@
+{
+  "env": {
+    "browser": true,
+    "node": false,
+  },
+  "parser": "babel-eslint",
+  "plugins": [
+    "ava"
+  ],
+  "extends": [
+    "airbnb",
+    "plugin:ava/recommended"
+  ],
+  "rules": {
+    "no-dynamic-require": 0,
+    "no-console": 1, // give it a warning when use console
+    "no-continue": 0, // continue can be use
+    "no-ternary": 0, // can use ternary
+    "array-callback-return": 0, // do not need to be always return
+    "array-bracket-spacing": 0, // spacing between brackets and values in array shouldn't exist
+    "arrow-body-style": 0,
+    "arrow-parens": [2, "as-needed"],
+    "comma-spacing": [2, { "before": false, "after": true }],
+    "consistent-return": 0, // sometimes functions that doesn't need to be return
+    "curly": [2, "multi-line", "consistent"],
+    "camelcase": 0, // variables with underscores are also ok
+    "default-case": 0,
+    "dot-notation": 0,
+    "global-require": 0,
+    "keyword-spacing": 0,
+    "no-class-assign": 0,
+    "no-confusing-arrow": 0,
+    "no-floating-decimal": 0, // can be abbreviation
+    "no-lonely-if": 0,
+    "no-inner-declarations": 0,
+    "no-mixed-operators": 0,
+    "no-nested-ternary": 0,
+    "no-prototype-builtins": 0,
+    "no-param-reassign": 0,
+    "no-return-assign": 0,
+    "no-script-url": 0,
+    "no-use-before-define": 0,
+    "no-unneeded-ternary": 0,
+    "new-parens": 0,
+    "new-cap": [2, { "capIsNew": false, "newIsCap": true }],
+    "newline-after-import": 0, // it's ok sometimes
+    "newline-after-var": 0,
+    "newline-per-chained-call": 0,
+    "one-var": 0,
+    "one-var-declaration-per-line": 0,
+    "object-curly-spacing": [2, "always", { "objectsInObjects": false, "arraysInObjects": false }],
+    "padded-blocks": [2, { "blocks": "never", "classes": "always", "switches": "never" }],
+    "quotes": 0,
+    "quote-props": 0,
+    "space-before-function-paren": [2, { "anonymous": "ignore", "named": "never", "asyncArrow": "always" }],
+    "indent": [2, 2, { "SwitchCase": 1 }], // force use 2 space
+    "radix": 0,
+    "prefer-const": [2, {"destructuring": "all"}],
+    "no-underscore-dangle": 0,
+    "no-fallthrough": 0,
+    "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],
+    "no-undef": 1,
+    "react/jsx-filename-extension": 0,
+    "react/jsx-first-prop-new-line": 0,
+    "react/jsx-indent": 0,
+    "react/jsx-indent-props": 0,
+    "react/jsx-boolean-value": 0,
+    "react/jsx-closing-bracket-location": [1, { selfClosing: "after-props", nonEmpty: "after-props" }],
+    "react/jsx-quotes": 0,
+    "react/jsx-no-target-blank": 0,
+    "react/display-name": [0, { "ignoreTranspilerName": true }],
+    "react/jsx-wrap-multilines": 0,
+    "react/prefer-stateless-function": 0,
+    "react/prop-types": 0,
+    "react/sort-comp": 0, // could be useful
+    "react/no-did-mount-set-state": 0,
+    "react/self-closing-comp": 0,
+    "jsx-a11y/html-has-lang": 0,
+    "jsx-a11y/img-has-alt": 0,
+    "jsx-a11y/label-has-for": 0,
+    "jsx-a11y/no-static-element-interactions": 0,
+  }
+}

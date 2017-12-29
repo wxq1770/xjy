@@ -1,0 +1,14 @@
+{
+  "app": {
+    "helloTalkGene": "Hello world!"
+  },
+  "operations": {
+    "joyride": {
+      "back": "上一个",
+      "close": "关闭",
+      "last": "我知道了",
+      "next": "我知道了",
+      "skip": "结束向导"
+    }
+  }
+}

@@ -1,0 +1,129 @@
+.hst {
+  .hst__userguide {
+    // &--beaconroot,
+    // &--guideroot {
+    //   position: absolute;
+    // }
+    &--beacon {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      -webkit-appearance: none;
+      background-color: transparent;
+      border: 0;
+      cursor: pointer;
+      display: inline-block;
+      line-height: 1;
+      padding: 0;
+      z-index: 1000;
+
+      &__inner {
+        background-color: #e46e00;
+        animation: beacon-inner 1.2s infinite ease-in-out;
+        border-radius: 50%;
+        display: block;
+        height: 50%;
+        left: 50%;
+        opacity: .7;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 50%;
+      }
+      &__outer {
+        width: 16px;
+        height: 16px;
+        left: -2px;
+        top: -2px;
+        background-color: rgba(228, 110, 0, .2);
+        border: none;
+        animation: beacon-outer 1.2s infinite ease-in-out;
+        border-radius: 50%;
+        box-sizing: border-box;
+        display: block;
+        opacity: .9;
+        position: absolute;
+        transform: translateY(-50%);
+        transform-origin: center;
+      }
+    }
+    &--guide {
+      &__overlay {
+        cursor: pointer;
+        pointer-events: auto;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1060;
+      }
+      &__hole {
+        position: absolute;
+        border-radius: 2px;
+        background-color: transparent;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+      }
+      &__tooltip {
+        width: 348px;
+        position: absolute;
+        border-radius: 2px;
+        color: #fff;
+        text-align: left;
+        background-color: #424242;
+        padding: 20px;
+        z-index: 1510;
+        margin: 18px;
+
+        p {
+          padding: 0;
+          font-size: 14px;
+          color: #fff;
+          background-color: #424242;
+
+          a {
+            color: #99c5ff;
+            &:hover {
+              border-bottom: 1px solid currentColor;
+            }
+          }
+        }
+        span {
+          float: right;
+          border: 0;
+          cursor: pointer;
+          display: inline-block;
+          padding: 0 15px;
+          line-height: 32px;
+          vertical-align: top;
+          font-size: 14px;
+          color: #90caf9;
+          background: transparent;
+          border-radius: 2px;
+          margin-top: 14px;
+        }
+      }
+    }
+  }
+}
+@keyframes beacon-inner{
+  20% {
+    opacity: .9
+  }
+  90% {
+    opacity: .7
+  }
+}
+@keyframes beacon-outer {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    opacity: .7;
+    transform: scale(.75);
+  }
+  to {
+    opacity: .9;
+    transform: scale(1);
+  }
+}

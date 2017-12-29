@@ -1,0 +1,14 @@
+{
+  "app": {
+    "helloTalkGene": "Hello world!"
+  },
+  "operations": {
+    "joyride": {
+      "back": "Back",
+      "close": "Close",
+      "last": "Got it",
+      "next": "Got it",
+      "skip": "Skip"
+    }
+  }
+}
