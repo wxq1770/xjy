@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { hashHistory } from 'react-router';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { AppContainer } from 'react-hot-loader';
-import 'antd-mobile/dist/antd-mobile.css';
+// import 'antd-mobile/dist/antd-mobile.css';
 import App from './App';
 import createRoutes from './routes';
 import configureStore from './store';
