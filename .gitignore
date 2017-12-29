@@ -1,0 +1,7 @@
+npm-debug.log
+yarn-error.log
+node_modules
+assets
+prod
+.DS_Store
+src/config.js

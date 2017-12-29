@@ -12,7 +12,7 @@
   ],
   "plugins": [
     "react-hot-loader/babel",
-    ["import", { "libraryName": "antd", "style": true }],
+    ["import", { "libraryName": "antd-mobile", "style": true }],
     "transform-flow-strip-types"
   ],
   "env": {
