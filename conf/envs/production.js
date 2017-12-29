@@ -1,6 +1,6 @@
 module.exports = {
-  name: 'Start',
-  subname: 'React & Redux',
+  name: '小基因',
+  subname: '',
   footer: 'Copyright © 2017 chenjunhao.cn',
   debug: false,
   publicPath: '/assets/',
