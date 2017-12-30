@@ -7,6 +7,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const Visualizer = require('webpack-visualizer-plugin');
 const OfflinePlugin = require('offline-plugin');
+const autoprefixer = require('autoprefixer');
+const pxtorem = require('postcss-pxtorem');
 const conf = require('./src/config');
 const pkg = require('./package.json');
 const p = process.env.NODE_ENV === 'production';
@@ -16,6 +18,23 @@ const extractLess = new ExtractTextPlugin({
   allChunks: true,
   disable: !p,
 });
+
+const cssLoaderOptions = {
+  importLoaders: 1,
+};
+
+const postcssLoaderOptions = {
+  ident: "postcss",
+  plugins: loader => [
+    pxtorem({
+      rootValue: 100,
+      propWhiteList: [],
+    }),
+    autoprefixer({
+      browsers: ['last 2 version', 'Firefox ESR', '> 1%', 'ie >= 8', 'iOS >= 8', 'Android >= 4'],
+    }),
+  ],
+};
 
 const entries = {
   entry: p ? [
@@ -100,12 +119,22 @@ module.exports = {
         use: p ?
         extractLess.extract({
           fallback: "style-loader",
-          use: "css-loader",
+          use: [{
+            loader: "css-loader",
+            options: cssLoaderOptions,
+          }, {
+            loader: "postcss-loader",
+            options: postcssLoaderOptions,
+          }],
         }) :
         [{
-          loader: 'style-loader',
+          loader: "style-loader",
         }, {
-          loader: 'css-loader',
+          loader: "css-loader",
+          options: cssLoaderOptions,
+        }, {
+          loader: "postcss-loader",
+          options: postcssLoaderOptions,
         }],
       },
       {
@@ -115,6 +144,10 @@ module.exports = {
           fallback: "style-loader",
           use: [{
             loader: "css-loader",
+            options: cssLoaderOptions,
+          }, {
+            loader: "postcss-loader",
+            options: postcssLoaderOptions,
           }, {
             loader: "less-loader",
           }],
@@ -123,6 +156,10 @@ module.exports = {
           loader: "style-loader",
         }, {
           loader: "css-loader",
+          options: cssLoaderOptions,
+        }, {
+          loader: "postcss-loader",
+          options: postcssLoaderOptions,
         }, {
           loader: "less-loader",
         }],
