@@ -153,7 +153,6 @@ class Login extends PureComponent {
             sms_code: captcha,
           },
         });
-        console.log(status, 'statusstatusstatus');
         if (status === 1) {
           router.replace('/');
         } else {
@@ -263,6 +262,7 @@ class Login extends PureComponent {
           onClose={this.onCloseModal}
           transparent
           maskClosable={true}
+          closable={true}
           title="提示"
           footer={[{
             text: '确定',

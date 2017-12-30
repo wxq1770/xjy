@@ -35,6 +35,8 @@ body.talkgene.windows {
   border-bottom: 0.01rem solid #55CBD0;
   text-align: center;
   font-size: 0.38rem;
+  letter-spacing:0.3rem;
+  width: 3.0rem;
 }
 .am-modal-button-group-h .am-modal-button,.am-modal-button-group-v .am-modal-button{
   color: #2abec4 !important;
@@ -48,32 +50,18 @@ body.talkgene.windows {
   border-radius:0.05rem;
 }
 .am-checkbox-inner:after{
-  top: 1.4px !important;
-  right: 5px !important;
+  top: 0.04rem !important;
+  right: 0.14rem !important;
+  height: 0.22rem !important;
+  width: 0.1rem !important;
 }
 .am-modal{
   .am-modal-content{
     overflow:visible;
   }
-  .am-modal-title{
-    position: absolute;
-    background:url(../../../img/popup@2x.png);
-    background-size: 1.78rem 1.78rem;
-    width: 1.78rem;
-    height: 1.78rem;
-    top: -1.0rem;
-    left: 1.8rem;
-    font-size: 0;
-  }
-  .phone-captcha{
-    display: block;
-    width: 3rem;
-    height: 1rem;
-    margin:0.05rem auto;
-  }
   .am-modal-close{
     position: absolute;
-    top: 0.2rem;
+    top: 0.15rem;
     right: 0.2rem;
     width: 0.55rem;
     height: 0.55rem;
@@ -82,8 +70,40 @@ body.talkgene.windows {
     background-color: #fff;
   }
   .am-modal-close-x{
-    width: 16px;
-    height: 16px;
-
+    width: 0.32rem;
+    height: 0.32rem;
+  }
+}
+.am-modal.am-modal-transparent{
+  width: 5.8rem;
+  .am-modal-title{
+    position: absolute;
+    background:url(../../../img/popup@2x.png);
+    background-size: 1.78rem 1.78rem;
+    width: 1.78rem;
+    height: 1.78rem;
+    top: -1.0rem;
+    left: 2rem;
+    font-size: 0;
+  }
+  .am-modal-button-group-v .am-modal-button{
+    height: 1.0rem;
+    line-height: 1.0rem;
+    font-size: 0.3rem;
+  }
+  .am-modal-content{
+    border-radius: 0.2rem;
+    .am-modal-body{
+      padding-top: 0.45rem;
+      font-size: 0.3rem;
+      padding-bottom: 0.4rem;
+    }
+  }
+  .phone-captcha{
+    display: block;
+    width: 3rem;
+    height: 1rem;
+    margin:0.05rem auto;
+    margin-top: 0.3rem;
   }
 }
