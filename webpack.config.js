@@ -17,6 +17,20 @@ const extractLess = new ExtractTextPlugin({
   disable: !p,
 });
 
+const cssLoaderOptions = {
+  importLoaders: 1,
+};
+
+const postcssLoaderOptions = {
+  autoprefixer: {
+    pxtorem: {
+      rootValue: 100,
+      propWhiteList: [],
+    },
+    browsers: ['last 2 version', 'Firefox ESR', '> 1%', 'ie >= 8', 'iOS >= 8', 'Android >= 4'],
+  },
+};
+
 const entries = {
   entry: p ? [
     './index.js',
@@ -100,12 +114,22 @@ module.exports = {
         use: p ?
         extractLess.extract({
           fallback: "style-loader",
-          use: "css-loader",
+          use: [{
+            loader: "css-loader",
+            options: cssLoaderOptions,
+          }, {
+            loader: "postcss-loader",
+            options: postcssLoaderOptions,
+          }],
         }) :
         [{
-          loader: 'style-loader',
+          loader: "style-loader",
         }, {
-          loader: 'css-loader',
+          loader: "css-loader",
+          options: cssLoaderOptions,
+        }, {
+          loader: "postcss-loader",
+          options: postcssLoaderOptions,
         }],
       },
       {
@@ -115,6 +139,10 @@ module.exports = {
           fallback: "style-loader",
           use: [{
             loader: "css-loader",
+            options: cssLoaderOptions,
+          }, {
+            loader: "postcss-loader",
+            options: postcssLoaderOptions,
           }, {
             loader: "less-loader",
           }],
@@ -123,6 +151,10 @@ module.exports = {
           loader: "style-loader",
         }, {
           loader: "css-loader",
+          options: cssLoaderOptions,
+        }, {
+          loader: "postcss-loader",
+          options: postcssLoaderOptions,
         }, {
           loader: "less-loader",
         }],
