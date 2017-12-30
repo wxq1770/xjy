@@ -7,6 +7,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const Visualizer = require('webpack-visualizer-plugin');
 const OfflinePlugin = require('offline-plugin');
+const autoprefixer = require('autoprefixer');
+const pxtorem = require('postcss-pxtorem');
 const conf = require('./src/config');
 const pkg = require('./package.json');
 const p = process.env.NODE_ENV === 'production';
@@ -22,13 +24,16 @@ const cssLoaderOptions = {
 };
 
 const postcssLoaderOptions = {
-  autoprefixer: {
-    pxtorem: {
+  ident: "postcss",
+  plugins: loader => [
+    pxtorem({
       rootValue: 100,
       propWhiteList: [],
-    },
-    browsers: ['last 2 version', 'Firefox ESR', '> 1%', 'ie >= 8', 'iOS >= 8', 'Android >= 4'],
-  },
+    }),
+    autoprefixer({
+      browsers: ['last 2 version', 'Firefox ESR', '> 1%', 'ie >= 8', 'iOS >= 8', 'Android >= 4'],
+    }),
+  ],
 };
 
 const entries = {
