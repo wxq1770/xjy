@@ -75,6 +75,7 @@
   },
   "dependencies": {
     "antd-mobile": "^2.1.2",
+    "antd-mobile-demo-data": "^0.2.0",
     "autoprefixer": "^7.2.3",
     "babel-polyfill": "^6.20.0",
     "classnames": "^2.2.5",

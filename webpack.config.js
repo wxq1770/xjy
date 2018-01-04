@@ -27,7 +27,7 @@ const postcssLoaderOptions = {
   ident: "postcss",
   plugins: loader => [
     pxtorem({
-      rootValue: 100,
+      rootValue: 50,
       propWhiteList: [],
     }),
     autoprefixer({

@@ -6,6 +6,8 @@ import { Router, Route, IndexRoute } from 'react-router';
 import App from './containers/App';
 import Login from './containers/Login';
 import Register from './containers/Register';
+import Buy from './containers/Buy';
+import Address from './containers/Address';
 
 const validate = (getState, dispatch) => {
   return async (location, replace, callback) => {
@@ -57,6 +59,8 @@ export default function createRoutes({ getState, dispatch }) {
       </Route>
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/buy" component={Buy} />
+      <Route path="/address" component={Address} />
     </Router>
   );
 }

@@ -12,7 +12,6 @@ import configureStore from './store';
 const initialState = window.__INITIAL_STATE__ || {};
 const store = configureStore(initialState, hashHistory);
 const routes = createRoutes(store);
-
 const render = Component => {
   ReactDOM.render(
     <AppContainer>

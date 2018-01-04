@@ -10,7 +10,7 @@ const initialState = fromJS({
 
 });
 
-export default function appReducer(state = initialState, action) {
+export default function registerReducer(state = initialState, action) {
   // switch (action.type) {
   // }
   return state;

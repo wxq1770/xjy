@@ -94,19 +94,27 @@ class Register extends PureComponent {
 
   sendCode = async () => {
     const { actions } = this.props;
-    const { phone, phoneError, sendStatus } = this.state;
+    const { phone, phoneError, sendStatus,verify_code } = this.state;
+    let data = {};
     if (phone && !phoneError && sendStatus) {
       try {
         this.setState({
           sendSecond: 60,
           sendStatus: true,
         });
+        if(verify_code!==''){
+          data = {mobile: phone,verify_code:verify_code};
+        }else{
+          data = {mobile: phone};
+        }
         const { value: { status, msg }} = await actions.sendRegCode({
-          body: {
-            mobile: phone,
-          },
+          body: data,
         });
         if (status === 1) {
+          this.setState({
+            sendTxt: '60s',
+            sendStatus: false,
+          });
           this.interval = setInterval(() => {
             let count = this.state.sendSecond;
             if (count === 1) {
@@ -115,13 +123,14 @@ class Register extends PureComponent {
                 sendSecond: 60,
                 sendTxt: '获取验证码',
                 sendStatus: false,
+                verify_code : ''
               });
             } else {
               count--;
               this.setState({
                 sendSecond: count,
                 sendTxt: `${count}s`,
-                sendStatus: true,
+                sendStatus: false,
               });
             }
           }, 1000);
@@ -145,12 +154,14 @@ class Register extends PureComponent {
         throw error;
       }
     } else {
-      this.setState({
-        sendSecond: 60,
-        sendTxt: '获取验证码',
-        sendStatus: true,
-        phoneError: '请输入正确的手机号',
-      });
+      if(sendStatus){
+        this.setState({
+          sendSecond: 60,
+          sendTxt: '获取验证码',
+          sendStatus: true,
+          phoneError: '请输入正确的手机号',
+        });
+      }
     }
   }
 
@@ -178,7 +189,7 @@ class Register extends PureComponent {
             agree,
           },
         });
-        console.log(status,'statusstatusstatus');
+
         if (status === 1) {
           router.replace('/');
         } else {
@@ -215,6 +226,7 @@ class Register extends PureComponent {
   onPress = async () => {
     const { verify_code } = this.state;
     const { actions } = this.props;
+
     if (verify_code !== '') {
       try {
         const { value: { status, msg }} = await actions.checkVerifyCode({
@@ -229,6 +241,7 @@ class Register extends PureComponent {
             modal: false,
             verify_code: '',
           });
+          this.sendCode();
         } else {
           Toast.info(msg, 1);
           this.verifyCodeRef.focus();
