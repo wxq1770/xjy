@@ -7,7 +7,15 @@ import App from './containers/App';
 import Login from './containers/Login';
 import Register from './containers/Register';
 import Buy from './containers/Buy';
+import Result from './containers/Result';
 import Address from './containers/Address';
+import Order from './containers/Order';
+import Binding from './containers/Binding';
+import Index from './containers/Index';
+import Details from './containers/Details';
+import BindingRecord from './containers/BindingRecord';
+import UserOrder from './containers/User/Order';
+
 
 const validate = (getState, dispatch) => {
   return async (location, replace, callback) => {
@@ -58,9 +66,18 @@ export default function createRoutes({ getState, dispatch }) {
         <IndexRoute onEnter={redirect(getState, dispatch)} />
       </Route>
       <Route path="/login" component={Login} />
+      <Route path="/index" component={Index} />
+      <Route path="/Details" component={Details} />
       <Route path="/register" component={Register} />
       <Route path="/buy" component={Buy} />
       <Route path="/address" component={Address} />
+      <Route path="/result" component={Result} />
+      <Route path="/order" component={Order} />
+      <Route path="/binding" component={Binding} />
+      <Route path="/bindingRecord" component={BindingRecord} />
+      <Route path="/user">
+        <Route path="order" component={UserOrder} />
+      </Route>
     </Router>
   );
 }

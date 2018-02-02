@@ -1,4 +1,9 @@
 .buy{
+  ul,li{
+    margin:0;
+    padding:0;
+    list-style: none;
+  }
   .icon {
     display: inline-block;
     width: 0.4rem;
@@ -37,7 +42,7 @@
         text-align: center;
         color: #666;
         font-size: 0.14rem;
-        border:0.02rem solid #ccc;
+        border:0.02rem solid #ddd;
         border-radius: 0.6rem;
       }
       span.cur{
@@ -53,6 +58,15 @@
       text-align: center;
       background-color: #2ABEC4;
       padding-top: 0.1rem;
+      position: relative;
+      .buy-bill-user-del{
+        float: right;
+        font-size: 0.3rem;
+        color: #fff;
+        position: absolute;
+        top: 0.25rem;
+        right: 0.3rem;
+      }
       .buy-bills-input{
         margin: 0;
         padding:0;
@@ -86,6 +100,7 @@
       .buy-bills-showname{
         width: 2.7rem;
         height: 0.6rem;
+        line-height: 0.5rem;
         margin: 0 auto;
         position: relative;
         color: #fff;
@@ -112,20 +127,22 @@
       width: 0.35rem;
     }
     .am-checkbox-agree{
-      height: 1.28rem;
       padding-bottom: 0;
       border-bottom: 0.01rem solid #ddd;
-      margin-right: 0.3rem;
+      padding-top: 0;
     }
     .am-checkbox-agree:last-child{
       border-bottom: none;
     }
     .am-checkbox-agree .am-checkbox-inner{
-      top: 0.5rem;
+      top: 0.22rem;
     }
     .am-checkbox-agree .am-checkbox-agree-label{
-      width: 6.34rem;
-
+      height: 0.8rem;
+      margin-left: 0.6rem;
+      margin-top: 0;
+      display: block;
+      line-height: 0.8rem;
     }
     .am-checkbox-checked .am-checkbox-inner{
       background: #55CBD0;
@@ -133,17 +150,103 @@
   }
   .buy-bills-list{
     background: #fff;
+    .buy-bills-warp{
+      font-size: 0.3rem;
+      padding-top: 0.15rem;
+      position: relative;
+      .buuy-bills-detail{
+        display: none;
+        padding-left: 0.59rem;
+        margin-left: 0.3rem;
+        padding-bottom: 0.24rem;
+        padding-right: 0.3rem;
+        font-size: 0.28rem;
+        color: #666;
+        line-height: 0.6rem;
+        li{
+          overflow: hidden;
+          .b-b-d-name{
+            float: left;
+          }
+          .b-b-d-value{
+            float: right;
+          }
+        }
+      }
+    }
+    .buy-bills-warp:after{
+      content: '';
+      position: absolute;
+      background-color: #ddd;
+      display: block;
+      z-index: 1;
+      top: auto;
+      right: auto;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1PX;
+      -webkit-transform-origin: 50% 100%;
+      -ms-transform-origin: 50% 100%;
+      transform-origin: 50% 100%;
+      -webkit-transform: scaleY(0.5);
+      -ms-transform: scaleY(0.5);
+      transform: scaleY(0.5);
+    }
+    .buy-bills-warp:last-child:after{
+      background-color: #fff;
+    }
     .buy-bills-content{
-      padding-top: 0.18rem;
+      overflow: hidden;
+      height: 0.8rem;
+      line-height: 0.8rem;
+      .icon-xiala{
+        background:url(../../../img/zhankai@2x.png) no-repeat;
+        background-size: 0.4rem 0.34rem;
+        float: left;
+        margin-top: 0.24rem;
+        margin-left: 0.2rem;
+      }
     }
     .buy-bills-title{
       font-size: 0.3rem;
+      float: left;
+      height: 0.8rem;
+      line-height: 80px;
     }
     .buy-bills-money{
       float: right;
-      margin-top: 0.05rem;
+      margin-right: 0.3rem;
       color: #FF8A00;
     }
   }
-  
+  .buy-bill-add{
+    height: 2.6rem;
+    background-color: #fff;
+    margin-top: 0.2rem;
+    padding:0 0.3rem;
+    padding-top: 0.44rem;
+    .buy-bill-add-content{
+      background:url(../../../img/xinzeng.png) no-repeat center 0.2rem;
+      background-size: 0.8rem 0.8rem;
+      border:0.01rem dashed #2ABEC4;
+      text-align: center;
+      height: 1.7rem;
+      color: #2ABEC4;
+      font-size: 0.3rem;
+      padding-top: 1.12rem;
+    }
+  }
+}
+.popover-div{
+  padding: 0 0.2rem;
+  height: 0.8rem;
+  line-height: 0.8rem;
+  font-size: 0.3rem;
+  color: #666;
+}
+.fortest{
+  .am-popover-arrow{
+    left: 20px;
+  }
 }

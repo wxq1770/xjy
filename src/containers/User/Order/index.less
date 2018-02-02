@@ -1,0 +1,191 @@
+.user-order{
+  ul,li,h4{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .order-warp{
+    padding: 0.3rem;
+    background-color: #fff;
+    .order-warp-ul{
+      font-size: 0.28rem;
+      line-height: 0.6rem;
+      color: #333;
+      .order-warp-li{
+        position: relative;;
+      }
+      .o-w-l-name{
+        width: 1.7rem;
+        padding-right: 0.1rem;
+        text-align: right;
+        display: inline-block;
+      }
+      .o-w-l-status{
+        color: #FF8A00;
+        font-size: 0.3rem;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+      .o-w-l-copy{
+        margin-left: 0.2rem;
+        color: #2ABEC4;
+        font-size: 0.3rem;
+      }
+    }
+    .order-warp-ul:last-child{
+      margin-top: 0.24rem;
+    }
+  }
+  .product-info{
+    margin-top: 0.2rem;
+    background-color: #FFF;
+    .product-info-header{
+      position: relative;
+      height: 1.04rem;
+      background-color: #fff;
+      font-size: 0.3rem;
+      color: #2ABEC4;
+      padding-top: 0.3rem;
+      span{
+        display: block;
+        width: 1.6rem;
+        height: 0.42rem;
+        line-height: 0.42rem;
+        margin:0 auto;
+        text-align: center;
+        background-color: #fff;
+        position: relative;
+        z-index: 1
+      }
+    }
+    .product-info-header::after{
+      content: '';
+      position: absolute;
+      background-color: #eee;
+      display: block;
+      top: 0.46rem;
+      left: 0;
+      width: 90%;
+      margin-left: 5%;
+      height: 1PX;
+      -webkit-transform-origin: 50% 100%;
+      -ms-transform-origin: 50% 100%;
+      transform-origin: 50% 100%;
+      -webkit-transform: scaleY(0.5);
+      -ms-transform: scaleY(0.5);
+      transform: scaleY(0.5);
+    }
+    .product-info-header::before{
+      content: '';
+      position: absolute;
+      background-color: #eee;
+      display: block;
+      top: 0.52rem;
+      left: 0;
+      width: 90%;
+      margin-left: 5%;
+      height: 1PX;
+      -webkit-transform-origin: 50% 100%;
+      -ms-transform-origin: 50% 100%;
+      transform-origin: 50% 100%;
+      -webkit-transform: scaleY(0.5);
+      -ms-transform: scaleY(0.5);
+      transform: scaleY(0.5);
+    }
+    .product-info-content{
+      background-color: #F9F9F9;
+      overflow: hidden;
+      padding: 0.3rem;
+      margin-bottom: 0.2rem;
+      
+      .product-info-content-left{
+        color: #333;
+        font-size: 0.28rem;
+        float: left;
+        span{
+          display: block;
+          margin-bottom:0.15rem;
+          height: 0.4rem;
+          line-height: 0.4rem;
+        }
+        span:last-child{
+          margin-bottom: 0;
+        }
+      }
+      .color-666{
+        color: #666;
+      }
+      .product-info-content-right{
+        float: right;
+        font-size: 0.28rem;
+        width: 2.0rem;
+        height: 1.6rem;
+        border:0.01rem solid #2ABEC4;
+        position: relative;
+        text-align: center;
+        padding-top: 0.1rem;
+        .color-2a{
+          color: #2ABEC4;
+          font-size: 0.32rem;
+          margin-bottom: 0.05rem;
+        }
+        .color-666-1{
+          color: #666;
+          font-size: 0.24rem;
+        }
+        .color-2a-1{
+          position: absolute;
+          width: 100%;
+          height: 0.7rem;
+          bottom: 0;
+          left: 0;
+          background-color: #2ABEC4;
+          color: #fff;
+          font-size: 0.3rem;
+          text-align: center;
+          line-height: 0.7rem;
+          font-weight: bold;
+        }
+        span{
+          display: block;
+        }
+      }
+    }
+  }
+  .footer-btn{
+    height: 1.2rem;
+    margin-top: 0.2rem;
+    background-color: #fff;
+    padding: 0 0.3rem;
+    overflow: hidden;
+    .footer-btn-money{
+      font-size: 0.3rem;
+      color: #FF8A00;
+      line-height: 1.2rem;
+      float: left;
+    }
+    .footer-btn-right{
+      float: right;
+      font-size: 0.32rem;
+      color: #666;
+      padding-top: 0.23rem;
+      span{
+        display: block;
+        width: 2.0rem;
+        height: 0.7rem;
+        line-height: 0.7rem;
+        border:0.02rem solid #ccc;
+        font-size:0.32rem;
+        text-align: center;
+        margin-left: 0.1rem;
+        float: left;
+        border-radius: 0.4rem;
+      }
+      .footer-btn-span{
+        border:0.02rem solid #2ABEC4;
+        color: #2ABEC4;
+      }
+    }
+  }
+}

@@ -1,13 +1,66 @@
 .address{
+  ul,li,h4{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .address-set-form{
+    .address-set-form-item{
+      height: 1.0rem;
+      border-bottom: 0.02rem solid #ddd;
+      font-size: 0.28rem;
+      overflow: hidden;
+      .a-s-f-label{
+        float: left;
+        line-height: 1.0rem;
+      }
+      .a-s-f-input{
+        float: left;
+        width:5.7rem;
+        margin: 0;
+        padding: 0;
+        border:0;
+        background:0;
+        height: 0.6rem;
+        line-height: 0.6rem;
+        margin-top: 0.2rem;
+      }
+    }
+    .address-set-form-item:last-child{
+      border-bottom: none;;
+    }
+    .select-city{
+      float: left;
+      margin-top: 0.34rem;
+    }
+  }
+  .am-list-item .am-input-label,.am-list-content{
+    font-size: 0.28rem !important;
+    color: #333 !important;
+  }
+  .am-input-control input{
+    font-size: 0.28rem !important;
+    color: #666 !important;
+  }
+  .am-list-extra{
+    color: #666 !important;
+    font-size: 0.28rem !important;
+  }
+  .am-list-item .am-list-line .am-list-extra{
+    flex-basis: 67%;
+    text-align: left;
+  }
+  .am-list-body::before{
+    display: none !important;
+  }
+  .am-list-body::after{
+    display: none !important;
+  }
   .address-set{
     background-color: #fff;
-    padding-left: 0.3rem;
-    ul,li,h4{
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
     .address-set-title{
+      margin-left: 0.3rem;
+      margin-bottom: 0.1rem;
       color: #333;
       font-size: 0.3rem;
       background:url(../../../img/shouhuoxinxi.png) no-repeat 0 0.3rem;
@@ -16,41 +69,9 @@
       padding-left: 0.62rem;
       padding-top: 0.3rem;
     }
-    .address-set-form{
-      .address-set-form-item{
-        height: 1.0rem;
-        border-bottom: 0.01rem solid #ccc;
-        font-size: 0.28rem;
-        overflow: hidden;
-        .a-s-f-label{
-          float: left;
-          line-height: 1.0rem;
-        }
-        .a-s-f-input{
-          float: left;
-          width:5.7rem;
-          margin: 0;
-          padding: 0;
-          border:0;
-          background:0;
-          height: 0.6rem;
-          line-height: 0.6rem;
-          margin-top: 0.2rem;
-        }
-      }
-      .address-set-form-item:last-child{
-        border-bottom: none;;
-      }
-      .select-city{
-        float: left;
-        margin-top: 0.34rem;
-      }
-    }
   }
   .address-pay{
     background-color: #fff;
-    padding-left: 0.3rem;
-    padding-bottom: 0.38rem;
     margin-top: 0.2rem;
     h4{margin: 0;padding:0}
     .address-pay-title{
@@ -61,6 +82,7 @@
       line-height: 0.52rem;
       padding-left: 0.62rem;
       padding-top: 0.3rem;
+      margin-left: 0.3rem;
     }
     dl,dt,dd{
       padding:0;
@@ -84,11 +106,12 @@
     }
     .address-pay-fun{
       margin-top: 0.4rem;
+      margin-left: 0.3rem;
       span{
         height: 1.0rem;
         line-height: 1.0rem;
         width:2.6rem;
-        border:0.01rem solid #ccc;
+        border:0.02rem solid #ddd;
         border-radius: 0.08rem;
         margin-right: 0.1rem;
         text-indent: 1.1rem;
@@ -103,14 +126,18 @@
       }
     }
     .address-pay-invoice{
-      span{
+      margin-left: 0.3rem;
+      .a-p-i-label{
         height: 0.6rem;
         line-height: 0.6rem;
         width:1.8rem;
-        border:0.01rem solid #ccc;
+        border:0.02rem solid #ddd;
         border-radius: 0.08rem;
         margin-right: 0.1rem;
         text-align: center;
+      }
+      .a-s-f-label{
+        color: #333;
       }
     }
   }
