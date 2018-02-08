@@ -1,88 +1,122 @@
-import PropTypes from 'prop-types';
-// import classNames from 'classnames';
 import { connect } from 'react-redux';
 import { translate } from 'react-i18next';
-import { NavBar, Icon, Checkbox, Popover, ActionSheet,Picker, List, DatePicker, Radio } from 'antd-mobile';
-// import { bindActionCreators } from 'redux';
+import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
-
+import { NavBar, Icon, ListView } from 'antd-mobile';
+import { createForm } from 'rc-form';
 import toJS from '../../libs/toJS';
-
+import {
+  bindList,
+} from './actions';
 import './index.less';
 
-const relation = [{
-  value: 'zj-nb',
-  label: '父母',
-}, {
-  value: 'zj-hz',
-  label: '子女',
-}]
-
-class BindingRecord extends PureComponent {
-
-  static propTypes = {
-    children: PropTypes.node,
-  }
-
+class BindingRecord extends PureComponent{
   constructor(props) {
     window.history.replaceState({},
       document.title,
       window.location.pathname + window.location.hash,
     );
     super(props);
-    let locale = localStorage.getItem('locale');
-    if (!locale) {
-      locale = 'zh-CN';
-      localStorage.setItem('locale', locale);
-    }
+    const dataSource = new ListView.DataSource({
+      rowHasChanged: (row1, row2) => row1 !== row2,
+    });
+    this.page = 1;
+    this.page_size = 10;
+    this.page_total = 0;
     this.state = {
-      locale,
+      dataSource,
+      list: [],
+      isLoading: true,
     };
   }
   componentDidMount() {
     if (navigator.platform.indexOf('Win') > -1) {
       document.body.classList.add('windows');
     }
+    this.onEndReached();
+  }
+  onEndReached = async () => {
+    const { actions } = this.props;
+    try {
+      console.log(this.state.isLoading,'3333')
+      if(this.state.isLoading){
+        const list = [];
+        const { value: { status, msg, data }} = await actions.bindList({
+          body: {
+            page: this.page,
+            page_size: this.page_size,
+          },
+        });
+        this.state.list.map(item => {
+          list.push(item);
+          return item;
+        });
+        data.list.map(item => {
+          list.push(item);
+          return item;
+        });
+
+        this.page++;
+        this.page_total = data.page_total;
+        this.setState({
+          dataSource: this.state.dataSource.cloneWithRows(list),
+          isLoading: this.page !== this.page_total,
+          list,
+        });
+      }
+    } catch (error) {
+      // 处理登录错误
+      throw error;
+    }
+  }
+  onClick = item => {
+    this.props.router.push(`/buy/${item.bind_id}`);
   }
   render() {
+    const row = (rowData, sectionID, rowID) => {
+      return (
+        <div className="binding-record-item" key={rowID}>
+          <div className="b-r-i-warp clearfix">
+            <span className="b-r-i-warp-left">样本码：{rowData.sample_code}</span>
+            <span className="b-r-i-warp-right">检测密码：{rowData.check_code}</span>
+          </div>
+          <div className="b-r-i-warp clearfix">
+            <span className="b-r-i-warp-left">绑定人：{rowData.real_name}（{rowData.sex === 1 ? '男' : '女'}）<span className="benren">本人</span></span>
+            <span className="b-r-i-warp-right">绑定日期：{rowData.bind_date}</span>
+          </div>
+          <div className="b-r-i-btn" onClick={() => this.onClick(rowData)}>再次购买</div>
+        </div>
+      );
+    };
     return (
       <div className="binding-record">
         <NavBar
           mode="dark"
           icon={<Icon type="left" />}
-          onLeftClick={() => console.log('onLeftClick')}
-        >绑定记录</NavBar>
-        <div className="binding-record-item">
-          <div className="b-r-i-warp clearfix">
-            <span className="b-r-i-warp-left">样本码：2123294892239</span>
-            <span className="b-r-i-warp-right">检测密码：123123312</span>
-          </div>
-          <div className="b-r-i-warp clearfix">
-            <span className="b-r-i-warp-left">绑定人：条条（男）<span className="benren">本人</span></span>
-            <span className="b-r-i-warp-right">绑定日期：2017-01-22</span>
-          </div>
-          <div className="b-r-i-btn">再次购买</div>
-        </div>
-        <div className="binding-record-item">
-          <div className="b-r-i-warp clearfix">
-            <span className="b-r-i-warp-left">样本码：2123294892239</span>
-            <span className="b-r-i-warp-right">检测密码：123123312</span>
-          </div>
-          <div className="b-r-i-warp clearfix">
-            <span className="b-r-i-warp-left">绑定人：条条（男）<span className="benren">本人</span></span>
-            <span className="b-r-i-warp-right">绑定日期：2017-01-22</span>
-          </div>
-          <div className="b-r-i-btn">再次购买</div>
-        </div>
+          onLeftClick={() => window.history.go(-1)}>
+          绑定记录
+        </NavBar>
+        <ListView
+          ref={el => this.lv = el}
+          dataSource={this.state.dataSource}
+          renderFooter={() => (<div style={{ textAlign: 'center' }}>
+            {this.state.isLoading ? '正在加载...' : '暂无数据'}
+          </div>)}
+          renderRow={row}
+          pageSize={this.page_size}
+          useBodyScroll
+          scrollRenderAheadDistance={500}
+          onEndReached={this.onEndReached}
+          onEndReachedThreshold={10} />
       </div>
     );
   }
 
 }
 
-export default translate()(connect((state, ownProps) => ({
-  children: ownProps.children,
-}), () => ({
+export default createForm()(translate()(connect(() => ({
+}), dispatch => ({
   actions: {
+    bindList: bindActionCreators(bindList, dispatch),
   },
-}))(toJS(BindingRecord)));
+}))(toJS(BindingRecord))));

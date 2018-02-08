@@ -22,13 +22,17 @@ class BuyAccount extends PureComponent {
       document.body.classList.add('windows');
     }
   }
+  submitForm = (item) => {
+    this.props.submit(item);
+  }
   render() {
     const {
       submitting,
     } = this.state;
     const {
-      total
-    } = this.props
+      total,
+      item,
+    } = this.props.total;
     return (
       <div className="buy-account">
         <ul className="buy-account-list">
@@ -61,7 +65,7 @@ class BuyAccount extends PureComponent {
           <dt>实际支付</dt>
           <dd>
             <span className="buy-account-money-num">￥{total ? total : 0}</span>
-            <span className="buy-account-btn">提交</span>
+            <span className="buy-account-btn" onClick={this.submitForm.bind(this,item)}>提交</span>
           </dd>
         </dl>
       </div>

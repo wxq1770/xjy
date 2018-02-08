@@ -4,6 +4,9 @@
     margin: 0;
     padding: 0;
   }
+  .am-list-body{
+    background: #f5f5f5;
+  }
   .order-warp{
     padding: 0.3rem;
     background-color: #fff;
@@ -40,6 +43,7 @@
   .product-info{
     margin-top: 0.2rem;
     background-color: #FFF;
+    padding: 0px 0.3rem;
     .product-info-header{
       position: relative;
       height: 1.04rem;
@@ -47,58 +51,31 @@
       font-size: 0.3rem;
       color: #2ABEC4;
       padding-top: 0.3rem;
-      span{
-        display: block;
-        width: 1.6rem;
-        height: 0.42rem;
-        line-height: 0.42rem;
-        margin:0 auto;
-        text-align: center;
-        background-color: #fff;
-        position: relative;
-        z-index: 1
+      border-bottom:1px solid #eee;
+      .product-info-header-left{ float: left; color: #333; }
+      .product-info-header-right{ 
+        float: right; 
+        color: #ccc; 
+        span{
+          color: #FF8A00; 
+          float: left;
+        } 
+        .am-icon-right{
+          margin-top: -0.05rem;
+        } 
       }
-    }
-    .product-info-header::after{
-      content: '';
-      position: absolute;
-      background-color: #eee;
-      display: block;
-      top: 0.46rem;
-      left: 0;
-      width: 90%;
-      margin-left: 5%;
-      height: 1PX;
-      -webkit-transform-origin: 50% 100%;
-      -ms-transform-origin: 50% 100%;
-      transform-origin: 50% 100%;
-      -webkit-transform: scaleY(0.5);
-      -ms-transform: scaleY(0.5);
-      transform: scaleY(0.5);
-    }
-    .product-info-header::before{
-      content: '';
-      position: absolute;
-      background-color: #eee;
-      display: block;
-      top: 0.52rem;
-      left: 0;
-      width: 90%;
-      margin-left: 5%;
-      height: 1PX;
-      -webkit-transform-origin: 50% 100%;
-      -ms-transform-origin: 50% 100%;
-      transform-origin: 50% 100%;
-      -webkit-transform: scaleY(0.5);
-      -ms-transform: scaleY(0.5);
-      transform: scaleY(0.5);
     }
     .product-info-content{
       background-color: #F9F9F9;
       overflow: hidden;
       padding: 0.3rem;
       margin-bottom: 0.2rem;
-      
+      .moeny{
+        float: right;
+        font-size: 0.28rem;
+        color: #333;
+        margin-top: 0.55rem;
+      }
       .product-info-content-left{
         color: #333;
         font-size: 0.28rem;
@@ -152,21 +129,24 @@
         }
       }
     }
+    .product-info-content:last-child{
+      margin-bottom: 0;
+    }
   }
   .footer-btn{
     height: 1.2rem;
-    margin-top: 0.2rem;
     background-color: #fff;
-    padding: 0 0.3rem;
+    border-top:1px solid #eee;
     overflow: hidden;
     .footer-btn-money{
       font-size: 0.3rem;
       color: #FF8A00;
       line-height: 1.2rem;
-      float: left;
+      float: right;
     }
     .footer-btn-right{
       float: right;
+      margin-left: 0.3rem;
       font-size: 0.32rem;
       color: #666;
       padding-top: 0.23rem;

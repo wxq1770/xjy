@@ -8,7 +8,10 @@ import BuyAccount from '../../components/BuyAccount';
 
 import toJS from '../../libs/toJS';
 import {
-  mobileExist,
+  historyPerson,
+  geneGoodsList,
+  buyReducer,
+  total,
 } from './actions';
 import './index.less';
 
@@ -24,111 +27,141 @@ class Buy extends PureComponent {
     super(props);
     this.state = {
       submitting: false,
-      cur:[],
-      editIdArr:[],
-      total:0,
-      sale:40,
-      baseBill:{
-        name : '',
-        userId : '',
-        disabled : false,
-        product : [{
-          id:1,
-          title : '神奇小体验1',
-          money : 99,
-          checked : true,
-          showDetail : false,
-          detail : [{
-            name : '酒精耐受度1',
-            value: '喝多少酒会脸红1'
-          },{
-            name : '脑容量1',
-            value: '你脑袋究竟有多大1'
-          },{
-            name : '创造力1',
-            value: '你是创造者1'
-          }]
-        },{
-          id:2,
-          title : '神奇小体验2',
-          money : 99,
-          checked : true,
-          showDetail : false,
-          detail : [{
-            name : '酒精耐受度2',
-            value: '喝多少酒会脸红2'
-          },{
-            name : '脑容量2',
-            value: '你脑袋究竟有多大2'
-          },{
-            name : '创造力2',
-            value: '你是创造者2'
-          }]
-        }]
+      cur: [],
+      editIdArr: [],
+      total: 0,
+      sale: 40,
+      baseBill: {
+        real_name: '',
+        bind_id: '',
+        disabled: false,
+        product: [],
       },
-      billsList : [],
-      historyName : [{
-        userId : 1,
-        name:'张三'
-      },{
-        userId : 2,
-        name:'李四'
-      },{
-        userId : 3,
-        name:'王五'
-      }],
+      billsList: [],
+      historyPerson: [],
     };
   }
-  
-  componentDidMount() {
+  componentDidMount = async () => {
+    const { actions } = this.props;
+    let cur = [];
+    let obj = [];
     if (navigator.platform.indexOf('Win') > -1) {
       document.body.classList.add('windows');
     }
-    const baseBill = this.state.baseBill;
-    const billsList = []
-    billsList.push(JSON.parse(JSON.stringify(baseBill)));
+    try {
+      const { value: { status, msg, data }} = await actions.historyPerson({
+        body: {},
+      });
 
-    this.setState({
-      billsList : billsList
-    })
+      let historyPersonData = data;
+      this.setState({
+        historyPerson: historyPersonData,
+      });
+
+      if(this.props.buyReducer.length > 0){
+        this.props.buyReducer.map(item => {
+          if(item.bind_id !== ''){
+            cur.push(item.bind_id);
+          }
+          obj.push(item);
+          return item;
+        });
+        try {
+          const { value: { status, msg, data }} = await actions.geneGoodsList({
+            body: {},
+          });
+          const baseBill = this.state.baseBill;
+          baseBill.product = data.map(item => {
+            item['checked'] = item['checked'] ? item['checked'] : true;
+            item['showDetail'] = item['showDetail'] ? item['showDetail'] : false;
+            return item;
+          });
+          this.setState({
+            cur,
+            billsList: obj,
+            baseBill,
+          });
+        } catch (error) {
+          // 处理登录错误
+          throw error;
+        }
+      }else if(this.props.params.historyId){
+        try {
+          const { value: { status, msg, data }} = await actions.geneGoodsList({
+            body: {},
+          });
+          const baseBill = this.state.baseBill;
+          const billsList = [];
+          baseBill.product = data.map((item)=>{
+            item['checked'] = item['checked'] ? item['checked'] : true;
+            item['showDetail'] = item['showDetail']  ? item['showDetail']  : false;
+            return item;
+          });
+          billsList.push(JSON.parse(JSON.stringify(baseBill)));
+          this.setState({
+            billsList,
+          });
+          this.clickName(historyPersonData.filter(item => { return item.bind_id === this.props.params.historyId})[0]);
+        } catch (error) {
+          // 处理登录错误
+          throw error;
+        }
+      }else{
+        try {
+          const { value: { status, msg, data }} = await actions.geneGoodsList({
+            body: {},
+          });
+          const baseBill = this.state.baseBill;
+          const billsList = [];
+          baseBill.product = data.map((item)=>{
+            item['checked'] = item['checked'] ? item['checked'] : true;
+            item['showDetail'] = item['showDetail']  ? item['showDetail']  : false;
+            return item;
+          });
+          billsList.push(JSON.parse(JSON.stringify(baseBill)));
+
+          this.setState({
+            billsList,
+          });
+        } catch (error) {
+          // 处理登录错误
+          throw error;
+        }
+      }
+    } catch (error) {
+      // 处理登录错误
+      throw error;
+    }
   }
-  clickName = (item) => {
-    let array = this.state.cur.map((item)=>{return item});
-    let {baseBill,billsList} = this.state;
+  clickName = item => {
+    let array = this.state.cur.map(item => { return item });
+    let { baseBill, billsList } = this.state;
     let status = true;
 
-    if(billsList[0].userId === '' && billsList[0].name === '' && billsList.length === 1){
-      array.push(item.userId);
-      billsList[0] = Object.assign({},JSON.parse(JSON.stringify(baseBill)),item,{disabled:true})
+    if(billsList[0].bind_id === '' && billsList[0].real_name === '' && billsList.length === 1){
+      array.push(item.bind_id);
+      billsList[0] = Object.assign({}, JSON.parse(JSON.stringify(baseBill)), item, { disabled: true });
     }else{
-      billsList = billsList.filter((key)=>{
-        if(key.userId === item.userId){
+      billsList = billsList.filter(key => {
+        if(key.bind_id === item.bind_id){
           status = false;
-          array = array.filter((j)=>{
-            if(j === item.userId){
-              return false
-            }else{
-              return true
-            }
-          });
-          return false
-        }else{
-          return true;
+          array = array.filter(j => (!j === item.bind_id));
+          return false;
         }
-      })
+        return true;
+      });
       if(status){
-        array.push(item.userId);
-        billsList.push(Object.assign({},JSON.parse(JSON.stringify(baseBill)),item,{disabled:true}));
+        array.push(item.bind_id);
+        billsList.push(Object.assign({}, JSON.parse(JSON.stringify(baseBill)), item, { disabled: true }));
       }
       if(billsList.length === 0){
         billsList[0] = JSON.parse(JSON.stringify(baseBill));
       }
     }
-
     this.setState({
-      cur : array,
-      billsList : billsList
-    })
+      cur: array,
+      billsList,
+    });
   }
   addBill = ()=>{
     const baseBill = this.state.baseBill;
@@ -138,7 +171,6 @@ class Buy extends PureComponent {
       return true;
     });
     array.push(JSON.parse(JSON.stringify(baseBill)));
-
     this.setState({
       billsList : array
     })
@@ -162,7 +194,7 @@ class Buy extends PureComponent {
     const array = [];
     billsList.map((key,j)=>{
       if(j === i){
-        key['name'] = e.target.value;
+        key['real_name'] = e.target.value;
       }
       array.push(key);
       return true;
@@ -199,7 +231,7 @@ class Buy extends PureComponent {
         return true;
       })
       arrayCur = cur.filter((key)=>{
-        if(key === item.userId){
+        if(key === item.bind_id){
           return false;
         }
         return true;
@@ -214,15 +246,20 @@ class Buy extends PureComponent {
   countTotal = ()=>{
     const { billsList,sale } = this.state;
     let total = 0;
+    let array = [];
     billsList.map((item)=>{
       item.product.map((key)=>{
         if(key.checked === true){
-          total = total + key.money - sale;
+          total = total + key.shop_price - key.discount_amount;
         }
       })
+      array.push(item);
       return true
     })
-    return total
+    return {
+      total : total,
+      item : array
+    }
   }
   onChangeChecked = (e,i,j)=>{
     const billsList = this.state.billsList;
@@ -248,32 +285,38 @@ class Buy extends PureComponent {
       billsList : billsListArr
     })
   }
+  submit = (item) => {
+    const { actions } = this.props;
+    actions.total(this.countTotal().total);
+    actions.buyReducer(item);
+    this.props.router.push('/address');
+  }
   render() {
     const {
       submitting,
-      historyName,
+      historyPerson,
       cur,
       billsList,
       editIdArr,
       total
     } = this.state;
-    const historyNameTmp = historyName.map((item,i)=>{
-      return <span key={i} className={(cur.join().indexOf(item.userId) > -1 ? 'cur' : '')} onClick={this.clickName.bind(this,item)}>{item.name}</span>
+    const historyPersonTmp = historyPerson.map((item,i)=>{
+      return <span key={i} className={(cur.join().indexOf(item.bind_id) > -1 ? 'cur' : '')} onClick={this.clickName.bind(this,item)}>{item.real_name}</span>
     })
 
     const billsListTmp = billsList.map((item,i)=>{
       const product = item.product.map((key,j)=>{
           const detail = key.detail.map((obj,m)=>{
             return <li key={m}>
-              <span className="b-b-d-name">{obj.name}</span>
-              <span className="b-b-d-value">{obj.value}</span>
+              <span className="b-b-d-name">{obj.goods_remark}</span>
+              <span className="b-b-d-value">{obj.goods_content}</span>
             </li>
           })
         return <div className="buy-bills-warp" key={j}>
           <div className="buy-bills-content">
-            <span className="buy-bills-title"><AgreeItem onChange={(e)=>{this.onChangeChecked(e,i,j)}} key={j} defaultChecked={key.checked}>{key.title}</AgreeItem></span>
+            <span className="buy-bills-title"><AgreeItem onChange={(e)=>{this.onChangeChecked(e,i,j)}} key={j} defaultChecked={key.checked}>{key.goods_name}</AgreeItem></span>
             <span className="icon icon-xiala" onClick={this.onClickXiaLa.bind(this,i,j)}></span>
-            <span className="buy-bills-money" onClick={this.onClickXiaLa.bind(this,i,j)}>￥{key.money}元</span>
+            <span className="buy-bills-money" onClick={this.onClickXiaLa.bind(this,i,j)}>￥{(key.shop_price-key.discount_amount)}元</span>
           </div>
           <ul className="buuy-bills-detail" style={{display:(key.showDetail?'block':'none')}}>
             {detail}
@@ -283,12 +326,12 @@ class Buy extends PureComponent {
 
       const editName = item.disabled ? 
         <div className="buy-bills-showname">
-          <strong>{item.name}</strong>
+          <strong>{item.real_name}</strong>
           <span className="icon icon-bianji" onClick={this.editName.bind(this,item,i)}></span>
         </div>
       : 
         <div className="buy-bills-input">
-          <input type="text" value={item.name} onChange={(e)=>{this.onChangeName(e,item,i)}}/>
+          <input type="text" value={item.real_name} onChange={(e)=>{this.onChangeName(e,item,i)}}/>
           <span onClick={this.onSaveName.bind(this,item,i)}>保存</span>
         </div>
       ;
@@ -296,7 +339,7 @@ class Buy extends PureComponent {
       return <div className="buy-bills" key={i}>
         <div className="buy-bills-header">
           {editName}
-          <span className="buy-bill-user-del" style={{display:(billsList.length === 1 && !item.userId)?'none':'block'}} onClick={this.onDelUser.bind(this,item,i)}>删除</span>
+          <span className="buy-bill-user-del" style={{display:(billsList.length === 1 && !item.bind_id)?'none':'block'}} onClick={this.onDelUser.bind(this,item,i)}>删除</span>
         </div>
         <div className="buy-bills-list">
           {product}
@@ -309,14 +352,14 @@ class Buy extends PureComponent {
         <NavBar
           mode="dark"
           icon={<Icon type="left" />}
-          onLeftClick={() => console.log('onLeftClick')}
+          onLeftClick={() => window.history.go(-1)}
         >购买</NavBar>
-        <div className='buy-inspector'>
+        <div className='buy-inspector' style={{display: historyPerson.length > 0 ? 'block' : 'none'}}>
           <h2><span>历史检测人</span><Popover
               overlayClassName="fortest"
               visible={false}
               overlay={[
-                (<div className="popover-div">哈哈哈哈哈哈哈哈哈哈哈哈哈</div>)
+                (<div className="popover-div">提示语A</div>)
               ]}
               align={{
                 overflow: { adjustY: 1, adjustX: 1 },
@@ -326,7 +369,7 @@ class Buy extends PureComponent {
               <span className="icon icon-wenhao" onClick={e=>{}}></span>
             </Popover></h2>
           <div className='buy-inspector-lable'>
-            {historyNameTmp}
+            {historyPersonTmp}
           </div>
         </div>
         <div className="buy-content">
@@ -335,15 +378,19 @@ class Buy extends PureComponent {
         <div className="buy-bill-add">
           <div className="buy-bill-add-content" onClick={this.addBill}>新增检测人</div>
         </div>
-        <BuyAccount total={this.countTotal()} />
+        <BuyAccount total={this.countTotal()} submit={this.submit}/>
       </div>
     );
   }
 }
 
-export default createForm()(translate()(connect(() => ({
+export default createForm()(translate()(connect((state, ownProps) => ({
+  buyReducer : state.getIn(['buyReducer', 'buyReducer'])
 }), dispatch => ({
   actions: {
-    mobileExist: bindActionCreators(mobileExist, dispatch),
+    geneGoodsList: bindActionCreators(geneGoodsList, dispatch),
+    historyPerson: bindActionCreators(historyPerson, dispatch),
+    buyReducer : bindActionCreators(buyReducer, dispatch),
+    total: bindActionCreators(total, dispatch),
   },
 }))(toJS(Buy))));

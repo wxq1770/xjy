@@ -4,10 +4,12 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-
+    title : '',
+    content : '',
+    btn : ''
 });
 
-export default function buyReducer(state = initialState, action) {
+export default function resultReducer(state = initialState, action) {
   // switch (action.type) {
   // }
   return state;

@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 import {
-  MOBILE_EXIST_SUCCESS,
+  ORDER_INFO,
 } from './constants';
 
 const initialState = fromJS({

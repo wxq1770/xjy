@@ -1,12 +1,12 @@
 import {
-  MOBILE_EXIST,
+  ORDER_LIST,
 } from './constants';
 
-export function mobileExist(params) {
+export function orderList(params) {
   return ({ fetch }) => ({
-    type: MOBILE_EXIST,
+    type: ORDER_LIST,
     payload: {
-      promise: fetch().mobileExist(params)
+      promise: fetch().orderList(params)
         .then(res => res.body)
         .catch(err => {
           throw err;

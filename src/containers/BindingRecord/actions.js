@@ -1,12 +1,12 @@
 import {
-  HELLO_WORLD,
+  BIND_LIST,
 } from './constants';
 
-export function helloword(params) {
+export function bindList(params) {
   return ({ fetch }) => ({
-    type: HELLO_WORLD,
+    type: BIND_LIST,
     payload: {
-      promise: fetch().helloword({ params })
+      promise: fetch().bindList({ params })
         .then(res => res.body)
         .catch(err => {
           throw err;

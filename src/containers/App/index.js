@@ -43,10 +43,7 @@ class App extends PureComponent {
   render() {
     return (
       <div>
-        <Button onClick={() => alert('Delete', 'Are you sure???', [
-          { text: 'Cancel', onPress: () => console.log('cancel') },
-          { text: 'Ok', onPress: () => console.log('ok') },
-        ])}>basic</Button>
+        {this.props.children}
       </div>
     );
   }

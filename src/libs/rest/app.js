@@ -6,6 +6,41 @@ export default {
     url: 'helloword/{{params}}',
   },
 
+  bindList: {
+    method: 'post',
+    url: 'api/mobile/user/bindList',
+  },
+
+  orderInfo: {
+    method: 'post',
+    url: 'api/mobile/user/orderInfo',
+  },
+
+  orderList: {
+    method: 'post',
+    url: 'api/mobile/user/orderList',
+  },
+
+  cancelOrder: {
+    method: 'post',
+    url: 'api/mobile/user/cancelOrder',
+  },
+
+  historyPerson: {
+    method: 'post',
+    url: 'api/mobile/user/historyPerson',
+  },
+
+  geneGoodsList: {
+    method: 'post',
+    url: 'api/mobile/goods/geneGoodsList',
+  },
+
+  addOrder: {
+    method: 'post',
+    url: 'api/mobile/order/addOrder',
+  },
+
   mobileExist: {
     method: 'post',
     url: 'api/mobile/user/mobileExist',

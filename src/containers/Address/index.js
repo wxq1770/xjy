@@ -2,12 +2,13 @@ import { connect } from 'react-redux';
 import { translate } from 'react-i18next';
 import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
-import { NavBar, Icon, Checkbox,Picker, List, InputItem  } from 'antd-mobile';
+import { NavBar, Icon, Checkbox,Picker, NoticeBar, List, InputItem , Toast } from 'antd-mobile';
 import { createForm } from 'rc-form';
 import BuyAccount from '../../components/BuyAccount';
 import toJS from '../../libs/toJS';
 import {
-  mobileExist,
+  addOrder,
+  addressReducer,
 } from './actions';
 import './index.less';
 const list = require('china-location/dist/location.json');
@@ -48,7 +49,6 @@ array.map((item)=>{
     key.children = array
   })
 })
-
 class Address extends PureComponent {
   constructor(props) {
     window.history.replaceState({},
@@ -56,110 +56,302 @@ class Address extends PureComponent {
       window.location.pathname + window.location.hash,
     );
     super(props);
+
     this.state = {
       submitting: false,
+      historyPerson : [],
+      tab : 0,
     };
   }
 
   componentDidMount() {
+
+    if(this.props.buyReducer.length === 0){
+       window.history.go(-1);
+    }
     if (navigator.platform.indexOf('Win') > -1) {
       document.body.classList.add('windows');
     }
-  }
-  onChange = (e) => {
 
+    this.setState({
+      tab : this.props.tab,
+      invoice_person : this.props.invoice_person,
+      invoice_title: this.props.invoice_title,
+      invoice_number: this.props.invoice_number,
+      consignee: this.props.consignee,
+      mobile: this.props.mobile,
+      address: this.props.address,
+      district: this.props.district,
+      buyReducer: this.props.buyReducer,
+      historyPerson : this.props.buyReducer.filter((item)=>{
+        if(item.bind_id === ''){
+          return false
+        }else{
+          return true
+        }
+      })
+    })
+  }
+  submit = async () => {
+    const { actions } = this.props;
+    const { getFieldError } = this.props.form;
+    let status = false;
+    let value = [];
+    try {
+      this.props.form.validateFields((error, item) => {
+        if( error && error.district ){
+          Toast.info(getFieldError('district'),2);
+        }
+        if(!error){
+          status = true;
+          value = item;
+        }
+      });
+      if(status){
+        const list = this.props.buyReducer.map((item)=>{
+          return {
+            remark : item.real_name,
+            goods_ids :item.product.filter((item)=>{
+              if(item.checked){
+                return true
+              }else{
+                return false
+              }
+            }),
+          }
+        })
+        const { value: { status, msg, data }} = await actions.addOrder({
+          body: {
+            list: list.map(item => {
+              return {
+                remark: item.remark,
+                goods_ids: item.goods_ids.map(item => item.goods_id).join(','),
+              };
+            }),
+            consignee: value.consignee ? value.consignee : '',
+            province: value.district && value.district[0] ? value.district[0] : '',
+            city: value.district && value.district[1] ? value.district[1] : '',
+            district: value.district && value.district[2] ? value.district[2] : '',
+            mobile: value.mobile ? value.mobile : '',
+            address: value.address ? value.address : '',
+            invoice_type: this.state.tab,
+            invoice_title: this.state.tab === 1 ? value.invoice_person ? value.invoice_person : '' : this.state.tab === 2 ? value.invoice_title ? value.invoice_title : '' : '',
+            invoice_number: value.invoice_number ? value.invoice_number : '',
+          },
+        });
+        if(status === 1009){
+          Toast.info('您未登录3秒后自动跳转到登录页面',3,()=>{this.props.router.push('/login')});
+        }else if(status === 1 && this.state.historyPerson.length === this.props.buyReducer.length){
+          this.props.router.push('/result/address/historyperson');
+        }else if(status === 1){
+          this.props.router.push('/result/address/succeed');
+        }else if(status !== 1 ){
+          this.props.router.push('/result/address/fail');
+        }else{
+          Toast.info(msg,2);
+        }
+      }
+    } catch (error) {
+      // 处理登录错误
+      throw error;
+    }
+    
+  }
+  tab = (value) =>{
+    const { actions } = this.props;
+    actions.addressReducer('tab',value)
+    this.setState({
+      tab : value
+    })
+  }
+  onChange = (type,value) => {
+    const { actions } = this.props;
+    actions.addressReducer(type,value)
+    this.props.form.setFieldsValue({
+      [type] : value
+    })
   }
   render() {
     const {
       submitting,
     } = this.state;
-    const { getFieldProps } = this.props.form;
-    return (
-      <div className="address" style={{height: `${window.screen.height}px`}}>
-        <NavBar
-          mode="dark"
-          icon={<Icon type="left" />}
-          onLeftClick={() => console.log('onLeftClick')}
-        >购买</NavBar>
+    const { getFieldProps,getFieldError } = this.props.form;
+    const total =  this.props.total;
+    const tabValue = this.state.tab;
+    const historyPersonName = this.state.historyPerson.map((item)=>{
+      return item.real_name;
+    });
+    const tab = tabValue === 1 ?
+      <div>
+        <InputItem
+          {...getFieldProps('invoice_person',
+            {
+              rules: [{ required: true, message: '请输入个人姓名' }],
+              initialValue: this.state.invoice_person,
+            },
+          )}
+          clear
+          placeholder="个人姓名"
+          error={getFieldError('invoice_person')}
+          onErrorClick={()=>{Toast.info(getFieldError('invoice_person'),2)}}
+          onChange={(v) => {this.onChange('invoice_person', v)}}
+          maxLength={20}
+        >个人姓名</InputItem>
+        <div className="tab-info">发票内容，基因检测服务费</div>
+      </div>
+    : tabValue === 2 ?
+      <div>
+        <InputItem
+          {...getFieldProps('invoice_title',
+            {
+              rules: [{ required: true, message: '请输入公司名称' }],
+              initialValue: this.state.invoice_title,
+            },
+          )}
+          clear
+          placeholder="公司名称"
+          error={getFieldError('invoice_title')}
+          onChange={(v) => {this.onChange('invoice_title', v)}}
+          onErrorClick={()=>{Toast.info(getFieldError('invoice_title'),2)}}
+          maxLength={20}>
+          公司名称
+        </InputItem>
+        <InputItem
+          {...getFieldProps('invoice_number',
+            {
+              rules: [{ required: true, message: '请输入纳税人识别号' }],
+              initialValue: this.state.invoice_number,
+            },
+          )}
+          clear
+          error={getFieldError('invoice_number')}
+          onChange={(v) => {this.onChange('invoice_number', v)}}
+          onErrorClick={()=>{Toast.info(getFieldError('invoice_number'),2)}}
+          placeholder="纳税人识别号"
+          labelNumber={6}
+          maxLength={20}>
+          纳税人识别号
+        </InputItem>
+        <div className="tab-info">发票内容，基因检测服务费</div>
+      </div>
+      : '';
 
-        <div className="address-set">
+      const addressForm = historyPersonName.length !== this.props.buyReducer.length ?
+        <div className="address-set" >
           <h4 className="address-set-title">收货信息</h4>
           <List>
             <InputItem
-              {...getFieldProps('autofocus')}
+              {...getFieldProps('consignee',
+                {
+                  rules: [{ required: true, message: '请输入您的收货人姓名' }],
+                  initialValue: this.state.consignee
+                }
+              )}
               clear
+              maxLength={6}
+              error={getFieldError('consignee')}
+              onChange={(v) => {this.onChange('consignee', v)}}
+              onErrorClick={()=>{Toast.info(getFieldError('consignee'),2)}}
               placeholder="收货人姓名"
             >收货人</InputItem>
             <InputItem
-              {...getFieldProps('phone')}
+              {...getFieldProps('mobile',
+                {
+                  rules: [{ required: true, message: '请输入您的手机号码' }],
+                  initialValue: this.state.mobile
+                }
+              )}
               clear
               type="phone"
+              clear
+              maxLength={11}
+              error={getFieldError('mobile')}
+              onChange={(v) => {this.onChange('mobile', v)}}
+              onErrorClick={()=>{Toast.info(getFieldError('mobile'),2)}}
               placeholder="手机号码"
             >手机号码</InputItem>
             <Picker extra="请选择(可选)"
               data={array}
               title="地址"
-              {...getFieldProps('district')}
-              onOk={e => console.log('ok', e)}
-              onDismiss={e => console.log('dismiss', e)}
+              {...getFieldProps('district',
+                {
+                  rules: [{ required: true, message: '请选择所在地区' }],
+                  initialValue: this.state.district
+                }
+              )}
+              error={getFieldError('district')}
+              onOk={(v) => {this.onChange('district', v)}}
+              onErrorClick={()=>{Toast.info(getFieldError('district'),2)}}
             >
               <List.Item extra="请选择地区" arrow="horizontal" onClick={() => this.setState({ visible: true })}>所在地区</List.Item>
             </Picker>
             <InputItem
-              {...getFieldProps('focus')}
+              {...getFieldProps('address',
+                {
+                  rules: [{ required: true, message: '请输入您的详细地址' }],
+                  initialValue: this.state.address
+                }
+              )}
+              maxLength={50}
+              onChange={(v) => {this.onChange('address', v)}}
+              error={getFieldError('address')}
+              onErrorClick={()=>{Toast.info(getFieldError('address'),2)}}
               clear
               placeholder="详细地址"
             >详情地址</InputItem>
           </List>
         </div>
+        :
+        '';
+    return (
+      <div className="address" style={{height: `${window.screen.height}px`}}>
+        <NavBar
+          mode="dark"
+          icon={<Icon type="left" />}
+          onLeftClick={() => window.history.go(-1)}
+        >购买</NavBar>
+        <NoticeBar mode="closable" style={{display:(historyPersonName.length > 0 ? 'block' : 'none')}} icon={null}>您好，{historyPersonName.join('、')}已有样本无需邮寄</NoticeBar>
+        {addressForm}
         <div className="address-pay">
           <h4 className="address-pay-title">支付信息</h4>
           <dl className="address-pay-fun">
             <dt>支付方式</dt>
             <dd>
-              <span className="icon-weixin">微信支付</span>
-              <span className="icon-zhifubao">支付宝</span>
+              <span className={"icon-weixin cur"}>微信支付</span>
             </dd>
           </dl>
           <dl className="address-pay-invoice">
             <dt>电子发票</dt>
             <dd>
-              <span className="a-p-i-label">不需要</span>
-              <span className="a-p-i-label">个人</span>
-              <span className="a-p-i-label">公司</span>
+              <span className={"a-p-i-label "+(tabValue === 0 ? 'cur' : '')} onClick={this.tab.bind(this,0)}>不需要</span>
+              <span className={"a-p-i-label "+(tabValue === 1 ? 'cur' : '')} onClick={this.tab.bind(this,1)}>个人</span>
+              <span className={"a-p-i-label "+(tabValue === 2 ? 'cur' : '')} onClick={this.tab.bind(this,2)}>公司</span>
             </dd>
           </dl>
         </div>
         <List>
-          <InputItem
-            {...getFieldProps('autofocus')}
-            clear
-            placeholder="收货人姓名"
-          >公司名称</InputItem>
-          <InputItem
-            {...getFieldProps('phone')}
-            clear
-            type="phone"
-            placeholder="手机号码"
-            labelNumber={6}
-          >纳税人识别号</InputItem>
-          <InputItem
-            {...getFieldProps('focus')}
-            clear
-            placeholder="详细地址"
-            labelNumber={13}
-          >发票内容，基因检测服务费</InputItem>
+          {tab}
         </List>
-        <BuyAccount />
+        <BuyAccount total={{total:total}} submit={this.submit} />
       </div>
     );
   }
-
 }
 
-export default createForm()(translate()(connect(() => ({
+export default createForm()(translate()(connect((state) => ({
+  invoice_person: state.getIn(['addressReducer', 'invoice_person']),
+  invoice_title: state.getIn(['addressReducer', 'invoice_title']),
+  invoice_number: state.getIn(['addressReducer', 'invoice_number']),
+  consignee: state.getIn(['addressReducer', 'consignee']),
+  mobile: state.getIn(['addressReducer', 'mobile']),
+  address: state.getIn(['addressReducer', 'address']),
+  district: state.getIn(['addressReducer', 'district']),
+  tab: state.getIn(['addressReducer', 'tab']),
+  buyReducer: state.getIn(['buyReducer', 'buyReducer']),
+  total: state.getIn(['buyReducer', 'total']),
 }), dispatch => ({
   actions: {
-    mobileExist: bindActionCreators(mobileExist, dispatch),
+    addOrder: bindActionCreators(addOrder, dispatch),
+    addressReducer: bindActionCreators(addressReducer, dispatch),
   },
 }))(toJS(Address))));

@@ -22,6 +22,8 @@ class Result extends PureComponent {
     super(props);
     this.state = {
       submitting: false,
+      page : this.props.params.page,
+      status : this.props.params.status
     };
   }
 
@@ -30,34 +32,62 @@ class Result extends PureComponent {
       document.body.classList.add('windows');
     }
   }
-  onChange = (e) => {
-
+  myOrder = () => {
+    this.props.router.push('/user/order');
+  }
+  back = () => {
+    window.history.go(-1);
   }
   render() {
     const {
       submitting,
+      status,
+      page
     } = this.state;
     const { getFieldProps } = this.props.form;
+    let content = '';
+    if(page === 'address' && status === 'historyperson'){
+      content = <div>
+        <h4>购买成功</h4>
+        <p>
+          感谢再次支持<br/>
+          实验室已有您的样本，我们会尽快生成报<br/>
+          告，请耐心等待
+        </p>
+      </div>
+    }else if(page === 'address' && status === 'succeed'){
+      content = <div>
+        <h4>购买成功</h4>
+        <p>
+          感谢您对小基因的支持<br/>
+          我们将于3个工作日内发货，点击<span className='my-order' onClick={this.myOrder}>我的订单</span><br/>
+          关注订单状态
+        </p>
+      </div>
+    }else if(page === 'address' && status === 'fail'){
+      content = <div>
+        <h4>支付失败</h4>
+        <p>
+          别着急~<br/>
+          点击重新支付在试试<br/>
+          也可以呼唤小基因微信客服哦~
+        </p>
+        <span className="result-content-btn" onClick={this.back}>重新支付</span>
+      </div>
+    }
     return (
       <div className="result">
         <NavBar
           mode="dark"
           icon={<Icon type="left" />}
-          onLeftClick={() => console.log('onLeftClick')}
+          onLeftClick={() => window.history.go(-1)}
         >购买</NavBar>
-        <div className="result-content result-fail"  style={{height: `${window.screen.height-50}px`}}>
-          <h4>支付失败</h4>
-          <p>
-            别着急~<br/>
-            点击重新支付在试试<br/>
-            也可以呼唤小基因微信客服哦
-          </p>
-          <span className="result-content-btn">重新支付</span>
+        <div className={"result-content "+(status === 'succeed' ? 'result-succeed' : 'result-fail')}  style={{height: `${window.screen.height-50}px`}}>
+          {content}
         </div>
       </div>
     );
   }
-
 }
 
 export default createForm()(translate()(connect(() => ({
