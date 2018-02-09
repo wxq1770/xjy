@@ -44,6 +44,15 @@ export function loginForm(params) {
   });
 }
 
+export function userStore(params) {
+  return ({ fetch }) => ({
+    type: 'userStore',
+    payload: state => {
+      return params;
+    },
+  });
+}
+
 export function checkVerifyCode(params) {
   return ({ fetch }) => ({
     type: CHECK_VERIFY_CODE,

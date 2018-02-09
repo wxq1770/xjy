@@ -15,14 +15,24 @@ export function addOrder(params) {
   });
 }
 
-export function addressReducer(type,value) {
-  return ({ fetch }) => ({
+export function addressReducer(type, value) {
+  return () => ({
     type: 'addressReducer',
-    payload: (state)=>{
+    payload: () => {
       return {
-        type: type,
-        value:value
-      }
+        type,
+        value,
+      };
     },
   });
 }
+
+export function clearStore() {
+  return () => ({
+    type: 'clearStore',
+    payload: () => {
+      return {};
+    },
+  });
+}
+

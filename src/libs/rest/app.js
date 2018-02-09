@@ -23,7 +23,7 @@ export default {
 
   cancelOrder: {
     method: 'post',
-    url: 'api/mobile/user/cancelOrder',
+    url: 'api/mobile/order/cancelOrder',
   },
 
   historyPerson: {
@@ -69,6 +69,10 @@ export default {
   checkVerifyCode: {
     method: 'post',
     url: 'api/home/api/checkVerifyCode',
-  }
-  
+  },
+
+  isLogin: {
+    method: 'post',
+    url: 'api/mobile/user/isLogin',
+  },
 };

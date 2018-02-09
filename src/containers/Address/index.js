@@ -9,7 +9,13 @@ import toJS from '../../libs/toJS';
 import {
   addOrder,
   addressReducer,
+  clearStore,
 } from './actions';
+
+import {
+  clearStoreBuy,
+} from '../Buy/actions';
+
 import './index.less';
 const list = require('china-location/dist/location.json');
 const AgreeItem = Checkbox.AgreeItem;
@@ -50,6 +56,7 @@ array.map((item)=>{
   })
 })
 class Address extends PureComponent {
+
   constructor(props) {
     window.history.replaceState({},
       document.title,
@@ -59,14 +66,13 @@ class Address extends PureComponent {
 
     this.state = {
       submitting: false,
-      historyPerson : [],
-      tab : 0,
+      historyPerson: [],
+      tab: 0,
     };
   }
 
   componentDidMount() {
-
-    if(this.props.buyReducer.length === 0){
+    if (this.props.buyReducer.length === 0) {
        window.history.go(-1);
     }
     if (navigator.platform.indexOf('Win') > -1) {
@@ -74,8 +80,8 @@ class Address extends PureComponent {
     }
 
     this.setState({
-      tab : this.props.tab,
-      invoice_person : this.props.invoice_person,
+      tab: this.props.tab,
+      invoice_person: this.props.invoice_person,
       invoice_title: this.props.invoice_title,
       invoice_number: this.props.invoice_number,
       consignee: this.props.consignee,
@@ -83,14 +89,13 @@ class Address extends PureComponent {
       address: this.props.address,
       district: this.props.district,
       buyReducer: this.props.buyReducer,
-      historyPerson : this.props.buyReducer.filter((item)=>{
-        if(item.bind_id === ''){
-          return false
-        }else{
-          return true
+      historyPerson: this.props.buyReducer.filter(item => {
+        if (item.bind_id === '') {
+          return false;
         }
-      })
-    })
+        return true;
+      }),
+    });
   }
   submit = async () => {
     const { actions } = this.props;
@@ -99,28 +104,27 @@ class Address extends PureComponent {
     let value = [];
     try {
       this.props.form.validateFields((error, item) => {
-        if( error && error.district ){
-          Toast.info(getFieldError('district'),2);
+        if (error && error.district) {
+          Toast.info(getFieldError('district'), 2);
         }
-        if(!error){
+        if (!error) {
           status = true;
           value = item;
         }
       });
-      if(status){
-        const list = this.props.buyReducer.map((item)=>{
+      if (status) {
+        const list = this.props.buyReducer.map(item => {
           return {
-            remark : item.real_name,
-            goods_ids :item.product.filter((item)=>{
-              if(item.checked){
-                return true
-              }else{
-                return false
+            remark: item.real_name,
+            goods_ids: item.product.filter(item => {
+              if (item.checked) {
+                return true;
               }
+              return false;
             }),
-          }
-        })
-        const { value: { status, msg, data }} = await actions.addOrder({
+          };
+        });
+        const { value: {status, msg, data }} = await actions.addOrder({
           body: {
             list: list.map(item => {
               return {
@@ -132,55 +136,53 @@ class Address extends PureComponent {
             province: value.district && value.district[0] ? value.district[0] : '',
             city: value.district && value.district[1] ? value.district[1] : '',
             district: value.district && value.district[2] ? value.district[2] : '',
-            mobile: value.mobile ? value.mobile : '',
+            mobile: value.mobile ? value.mobile.replace(/\s+/g, "") : '',
             address: value.address ? value.address : '',
             invoice_type: this.state.tab,
             invoice_title: this.state.tab === 1 ? value.invoice_person ? value.invoice_person : '' : this.state.tab === 2 ? value.invoice_title ? value.invoice_title : '' : '',
             invoice_number: value.invoice_number ? value.invoice_number : '',
           },
         });
-        if(status === 1009){
-          Toast.info('您未登录3秒后自动跳转到登录页面',3,()=>{this.props.router.push('/login')});
-        }else if(status === 1 && this.state.historyPerson.length === this.props.buyReducer.length){
+        if (status === 1009) {
+          Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login'));
+        } else if (status === 1 && this.state.historyPerson.length === this.props.buyReducer.length) {
+          actions.clearStore();
+          actions.clearStoreBuy();
           this.props.router.push('/result/address/historyperson');
-        }else if(status === 1){
+        } else if (status === 1) {
+          actions.clearStore();
+          actions.clearStoreBuy();
           this.props.router.push('/result/address/succeed');
-        }else if(status !== 1 ){
+        } else if (status !== 1) {
           this.props.router.push('/result/address/fail');
-        }else{
-          Toast.info(msg,2);
+        } else {
+          Toast.info(msg, 2);
         }
       }
     } catch (error) {
       // 处理登录错误
       throw error;
     }
-    
   }
-  tab = (value) =>{
+  tab = value => {
     const { actions } = this.props;
-    actions.addressReducer('tab',value)
+    actions.addressReducer('tab', value);
     this.setState({
-      tab : value
-    })
+      tab: value,
+    });
   }
-  onChange = (type,value) => {
+  onChange = (type, value) => {
     const { actions } = this.props;
-    actions.addressReducer(type,value)
+    actions.addressReducer(type, value);
     this.props.form.setFieldsValue({
-      [type] : value
-    })
+      [type]: value,
+    });
   }
   render() {
-    const {
-      submitting,
-    } = this.state;
-    const { getFieldProps,getFieldError } = this.props.form;
-    const total =  this.props.total;
+    const { getFieldProps, getFieldError } = this.props.form;
+    const total = this.props.total;
     const tabValue = this.state.tab;
-    const historyPersonName = this.state.historyPerson.map((item)=>{
-      return item.real_name;
-    });
+    const historyPersonName = this.state.historyPerson.map(item => item.real_name);
     const tab = tabValue === 1 ?
       <div>
         <InputItem
@@ -195,8 +197,9 @@ class Address extends PureComponent {
           error={getFieldError('invoice_person')}
           onErrorClick={()=>{Toast.info(getFieldError('invoice_person'),2)}}
           onChange={(v) => {this.onChange('invoice_person', v)}}
-          maxLength={20}
-        >个人姓名</InputItem>
+          maxLength={20}>
+          个人姓名
+        </InputItem>
         <div className="tab-info">发票内容，基因检测服务费</div>
       </div>
     : tabValue === 2 ?
@@ -251,20 +254,24 @@ class Address extends PureComponent {
               maxLength={6}
               error={getFieldError('consignee')}
               onChange={(v) => {this.onChange('consignee', v)}}
-              onErrorClick={()=>{Toast.info(getFieldError('consignee'),2)}}
+              onErrorClick={()=>{Toast.info(getFieldError('consignee'), 2)}}
               placeholder="收货人姓名"
             >收货人</InputItem>
             <InputItem
               {...getFieldProps('mobile',
                 {
-                  rules: [{ required: true, message: '请输入您的手机号码' }],
+                  rules: [{
+                    required: true, message: '请输入您的手机号码',
+                  }, {
+                    len: 13, message: '请输入11位手机号',
+                  }],
                   initialValue: this.state.mobile
                 }
               )}
               clear
               type="phone"
               clear
-              maxLength={11}
+              maxLength={13}
               error={getFieldError('mobile')}
               onChange={(v) => {this.onChange('mobile', v)}}
               onErrorClick={()=>{Toast.info(getFieldError('mobile'),2)}}
@@ -304,7 +311,7 @@ class Address extends PureComponent {
         :
         '';
     return (
-      <div className="address" style={{height: `${window.screen.height}px`}}>
+      <div className="address">
         <NavBar
           mode="dark"
           icon={<Icon type="left" />}
@@ -332,13 +339,13 @@ class Address extends PureComponent {
         <List>
           {tab}
         </List>
-        <BuyAccount total={{total:total}} submit={this.submit} />
+        <BuyAccount total={{total}} submit={this.submit} />
       </div>
     );
   }
 }
 
-export default createForm()(translate()(connect((state) => ({
+export default createForm()(translate()(connect(state => ({
   invoice_person: state.getIn(['addressReducer', 'invoice_person']),
   invoice_title: state.getIn(['addressReducer', 'invoice_title']),
   invoice_number: state.getIn(['addressReducer', 'invoice_number']),
@@ -353,5 +360,7 @@ export default createForm()(translate()(connect((state) => ({
   actions: {
     addOrder: bindActionCreators(addOrder, dispatch),
     addressReducer: bindActionCreators(addressReducer, dispatch),
+    clearStore: bindActionCreators(clearStore, dispatch),
+    clearStoreBuy: bindActionCreators(clearStoreBuy, dispatch),
   },
 }))(toJS(Address))));

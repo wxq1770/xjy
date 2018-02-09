@@ -1,12 +1,12 @@
 import {
-  HELLO_WORLD,
+  IS_LOGIN,
 } from './constants';
 
-export function helloword(params) {
+export function isLogin(params) {
   return ({ fetch }) => ({
-    type: HELLO_WORLD,
+    type: IS_LOGIN,
     payload: {
-      promise: fetch().helloword({ params })
+      promise: fetch().isLogin({ params })
         .then(res => res.body)
         .catch(err => {
           throw err;

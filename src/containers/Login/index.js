@@ -11,6 +11,7 @@ import {
   sendLoginCode,
   loginForm,
   checkVerifyCode,
+  //userStore,
 } from './actions';
 import Agree from '../../components/Agree';
 import './index.less';
@@ -72,7 +73,7 @@ class Login extends PureComponent {
 
   sendCode = async () => {
     const { actions } = this.props;
-    const { phone, phoneError, sendStatus,verify_code } = this.state;
+    const { phone, phoneError, sendStatus, verify_code } = this.state;
     let data = {};
     if (phone && !phoneError && sendStatus) {
       try {
@@ -81,10 +82,10 @@ class Login extends PureComponent {
           sendStatus: true,
         });
 
-        if(verify_code){
-          data = {mobile: phone,verify_code:verify_code};
+        if (verify_code) {
+          data = { mobile: phone, verify_code };
         }else{
-          data = {mobile: phone};
+          data = { mobile: phone };
         }
 
         const { value: { status, msg }} = await actions.sendLoginCode({
@@ -103,7 +104,7 @@ class Login extends PureComponent {
                 sendSecond: 60,
                 sendTxt: '获取验证码',
                 sendStatus: false,
-                verify_code : ''
+                verify_code: '',
               });
             } else {
               count--;
@@ -134,7 +135,7 @@ class Login extends PureComponent {
         throw error;
       }
     } else {
-      if(sendStatus){
+      if (sendStatus) {
         this.setState({
           sendSecond: 60,
           sendTxt: '获取验证码',
@@ -146,7 +147,6 @@ class Login extends PureComponent {
   }
 
   onClickVerifyCode = e => {
-    
     e.target.src = "/api/home/api/verifyCode?type=sms_login";
   }
 
@@ -169,6 +169,7 @@ class Login extends PureComponent {
         });
         if (status === 1) {
           router.replace('/');
+          //actions.userStore(true);
         } else {
           Toast.fail(msg, 2);
           this.setState({
@@ -215,7 +216,7 @@ class Login extends PureComponent {
           this.setState({
             submitting: false,
             modal: false,
-            verify_code: verify_code,
+            verify_code,
           });
 
           this.sendCode();
@@ -224,9 +225,8 @@ class Login extends PureComponent {
           this.verifyCodeRef.focus();
           this.setState({
             submitting: true,
-            verify_code : ''
+            verify_code: '',
           });
-
         }
       } catch (error) {
         throw error;
@@ -363,5 +363,6 @@ export default createForm()(translate()(connect(() => ({
     sendLoginCode: bindActionCreators(sendLoginCode, dispatch),
     loginForm: bindActionCreators(loginForm, dispatch),
     checkVerifyCode: bindActionCreators(checkVerifyCode, dispatch),
+    //userStore: bindActionCreators(userStore, dispatch),
   },
 }))(toJS(Login))));

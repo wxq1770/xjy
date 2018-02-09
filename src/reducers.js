@@ -3,7 +3,6 @@ import { combineReducers } from 'redux-immutable';
 /**
  * import modules reducers
  */
-import appReducer from './containers/App/reducer';
 import loginReducer from './containers/Login/reducer';
 import registerReducer from './containers/Register/reducer';
 import buyReducer from './containers/Buy/reducer';
@@ -12,12 +11,11 @@ import resultReducer from './containers/Result/reducer';
 
 
 const reducers = combineReducers({
-  app: appReducer,
-  login: loginReducer,
+  user: loginReducer,
   register: registerReducer,
-  buyReducer: buyReducer,
-  addressReducer : addressReducer,
-  resultReducer : resultReducer,
+  buyReducer,
+  addressReducer,
+  resultReducer,
 });
 
 export default reducers;

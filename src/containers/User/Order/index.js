@@ -11,6 +11,7 @@ import {
 import './index.less';
 
 class UserOrder extends PureComponent {
+
   constructor(props) {
     window.history.replaceState({},
       document.title,
@@ -39,7 +40,7 @@ class UserOrder extends PureComponent {
     const { actions } = this.props;
     const list = [];
     try {
-      if(this.state.isLoading){
+      if (this.state.isLoading) {
         const { value: { status, msg, data }} = await actions.orderList({
           body: {
             page: this.page,
@@ -60,7 +61,7 @@ class UserOrder extends PureComponent {
         this.setState({
           dataSource: this.state.dataSource.cloneWithRows(list),
           isLoading: this.page !== this.page_total,
-          list: list,
+          list,
         });
       }
     } catch (error) {
@@ -89,12 +90,12 @@ class UserOrder extends PureComponent {
                   <span className="color-666">检测人：{item.remark}</span>
                   <span>检测包含：{item.goods_names}</span>
                 </div>
-                <span className="moeny">￥{item.goods_price}元</span>
+                <span className="moeny">￥{item.total_price}元</span>
               </div>;
             })
           }
           <div className="footer-btn">
-            <div className="footer-btn-right" onClick={this.pay} style={{ display: rowData.pay_status === 0 ? 'blcok' : 'none' }}>
+            <div className="footer-btn-right" onClick={this.pay} style={{ display: rowData.status_name === '待支付' ? 'blcok' : 'none' }}>
               <span className="footer-btn-span">立即付款</span>
             </div>
             <div className="footer-btn-money">

@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { translate } from 'react-i18next';
 import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
-import { NavBar, NoticeBar, Icon, Toast} from 'antd-mobile';
+import { NavBar, NoticeBar, Icon, Toast, Modal} from 'antd-mobile';
 import { createForm } from 'rc-form';
 // import BuyAccount from '../../../components/BuyAccount';
 import toJS from '../../../libs/toJS';
@@ -23,6 +23,7 @@ class Order extends PureComponent {
     this.id = this.props.params.id;
     this.state = {
       details: {},
+      modal: false,
     };
   }
 
@@ -51,12 +52,17 @@ class Order extends PureComponent {
   pay = item => {
     console.log('支付', item);
   }
-  cancelOrder = async item => {
+  cancelOrder = async () => {
+    this.setState({
+      modal: true,
+    });
+  }
+  onPress = async () => {
     const { actions } = this.props;
     try {
       const { value: { status, msg }} = await actions.cancelOrder({
         body: {
-          order_id: item.order_id,
+          order_id: this.id,
         },
       });
       if(status !== 1) {
@@ -64,11 +70,19 @@ class Order extends PureComponent {
       }else{
         Toast.info('取消成功！');
         this.details();
+        this.setState({
+          modal: false,
+        });
+        window.history.go(-1);
       }
     } catch (error) {
       // 处理登录错误
       throw error;
     }
+  }
+
+  onCloseModal = () => {
+    this.setState({ modal: false });
   }
 
   render() {
@@ -92,7 +106,7 @@ class Order extends PureComponent {
           <span>{details.address}</span>
         </li>
       </ul>
-      <ul className="order-warp-ul">
+      <ul className="order-warp-ul" style={{ display: details.status_name === '已发货' ? 'block' : 'none' }}>
         <li className="order-warp-li">
           <span className="o-w-l-name">快递公司：</span>
           <span>{details.shipping_name}</span>
@@ -124,7 +138,7 @@ class Order extends PureComponent {
         <div className="product-info-content-left" style={{ paddingTop: item.history_id > 0 ? '0.3rem' : '0' }}>
           <span className="color-666" style={{ display: item.history_id > 0 ? 'none' : 'block' }}>检测人：{item.remark}</span>
           <span>检测包含：{item.goods_names}</span>
-          <span>￥{item.goods_price}元</span>
+          <span>￥{item.total_price}元</span>
         </div>
         {pwd}
       </div>;
@@ -168,6 +182,25 @@ class Order extends PureComponent {
             <span className="footer-btn-span" onClick={() => this.pay(details)}>立即付款</span>
           </div>
         </div>
+        <Modal
+          visible={this.state.modal}
+          onClose={this.onCloseModal}
+          transparent
+          maskClosable={true}
+          closable={true}
+          title="提示"
+          footer={[{
+            text: '取消',
+            onPress: this.onCloseModal,
+          }, {
+            text: '确定',
+            onPress: this.onPress,
+          }]}
+          wrapProps={{ onTouchStart: this.onWrapTouchStart }}>
+          <div>
+            <div style={{ padding: '0.5rem' }}>您确定要取消订单吗？</div>
+          </div>
+        </Modal>
       </div>
     );
   }

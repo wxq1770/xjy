@@ -1,17 +1,15 @@
 import { fromJS } from 'immutable';
-import {
-  MOBILE_EXIST_SUCCESS,
-  SEND_LOGIN_CODE_SUCCESS,
-  LOGIN_SUCCESS,
-  CHECK_VERIFY_CODE_SUCCESS
-} from './constants';
 
 const initialState = fromJS({
-
+    state: false,
 });
 
 export default function loginReducer(state = initialState, action) {
-  // switch (action.type) {
-  // }
+  switch (action.type) {
+    case 'userStore': {
+      const response = action.payload;
+      return state.set('state', fromJS(response() || {}));
+    }
+  }
   return state;
 }

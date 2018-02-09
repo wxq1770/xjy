@@ -1,4 +1,4 @@
 
-export const HELLO_WORLD = 'HELLO_WORLD';
-export const HELLO_WORLD_SUCCESS = 'HELLO_WORLD_SUCCESS';
-export const HELLO_WORLD_ERROR = 'HELLO_WORLD_ERROR';
+export const IS_LOGIN = 'IS_LOGIN';
+export const IS_LOGIN_SUCCESS = 'IS_LOGIN_SUCCESS';
+export const IS_LOGIN_ERROR = 'IS_LOGIN_ERROR';

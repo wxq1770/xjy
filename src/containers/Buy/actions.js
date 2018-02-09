@@ -30,19 +30,28 @@ export function geneGoodsList(params) {
 }
 
 export function buyReducer(params) {
-  return ({ fetch }) => ({
+  return () => ({
     type: 'buyReducer',
-    payload: (state)=>{
-      return params
+    payload: () => {
+      return params;
     },
   });
 }
 
 export function total(params) {
-  return ({ fetch }) => ({
+  return () => ({
     type: 'total',
-    payload: (state)=>{
-      return params
+    payload: () => {
+      return params;
+    },
+  });
+}
+
+export function clearStoreBuy() {
+  return () => ({
+    type: 'clearStoreBuy',
+    payload: state => {
+      return {};
     },
   });
 }
