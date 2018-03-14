@@ -26,7 +26,7 @@ class BindingRecord extends PureComponent{
     this.state = {
       dataSource,
       list: [],
-      isLoading: true,
+      isLoading: false,
     };
   }
   componentDidMount() {
@@ -38,7 +38,6 @@ class BindingRecord extends PureComponent{
   onEndReached = async () => {
     const { actions } = this.props;
     try {
-      console.log(this.state.isLoading,'3333')
       if(this.state.isLoading){
         const list = [];
         const { value: { status, msg, data }} = await actions.bindList({

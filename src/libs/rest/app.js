@@ -6,6 +6,46 @@ export default {
     url: 'helloword/{{params}}',
   },
 
+  saveBase64Img: {
+    method: 'post',
+    url: 'api/mobile/file/saveBase64Img',
+  },
+
+  progressInfo: {
+    method: 'post',
+    url: 'api/mobile/report/progressInfo',
+  },
+
+  professional: {
+    method: 'post',
+    url: 'api/mobile/report/professional',
+  },
+
+  imageText: {
+    method: 'post',
+    url: '/api/mobile/report/imageText',
+  },
+
+  goodsItem: {
+    method: 'post',
+    url: 'api/mobile/goods/goodsItem',
+  },
+
+  goodsProgressList: {
+    method: 'post',
+    url: 'api/mobile/user/goodsProgressList',
+  },
+
+  bindUserList: {
+    method: 'post',
+    url: 'api/mobile/user/bindUserList',
+  },
+
+  binding: {
+    method: 'post',
+    url: 'api/mobile/gene/bind',
+  },
+
   bindList: {
     method: 'post',
     url: 'api/mobile/user/bindList',
@@ -16,6 +56,11 @@ export default {
     url: 'api/mobile/user/orderInfo',
   },
 
+  getSignPackage: {
+    method: 'post',
+    url: 'api/mobile/weixin/getSignPackage',
+  },
+
   orderList: {
     method: 'post',
     url: 'api/mobile/user/orderList',
@@ -24,6 +69,16 @@ export default {
   cancelOrder: {
     method: 'post',
     url: 'api/mobile/order/cancelOrder',
+  },
+
+  getPayParamer: {
+    method: 'post',
+    url: 'api/mobile/payment/getPayParamer',
+  },
+
+  unbindList: {
+    method: 'post',
+    url: 'api/mobile/gene/unbindList',
   },
 
   historyPerson: {

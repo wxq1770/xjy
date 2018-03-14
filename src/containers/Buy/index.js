@@ -4,7 +4,6 @@ import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
 import { NavBar, Icon, Checkbox, Popover, Toast } from 'antd-mobile';
 import { createForm } from 'rc-form';
-import TabBarItem from '../../components/TabBarItem';
 import BuyAccount from '../../components/BuyAccount';
 
 import toJS from '../../libs/toJS';
@@ -30,6 +29,7 @@ class Buy extends PureComponent {
       submitting: false,
       cur: [],
       total: 0,
+      goods_id : this.props.params.goods_id ? parseInt(this.props.params.goods_id) : '',
       baseBill: {
         real_name: '',
         bind_id: '',
@@ -43,6 +43,7 @@ class Buy extends PureComponent {
   componentDidMount = async () => {
     Toast.loading('Loading...', 30);
     const { actions } = this.props;
+    const { goods_id } = this.state;
     let cur = [];
     let obj = [];
     if (navigator.platform.indexOf('Win') > -1) {
@@ -68,10 +69,9 @@ class Buy extends PureComponent {
           const { value: { status, msg, data }} = await actions.geneGoodsList({
             body: {},
           });
-          console.log(data,'data1');
           const baseBill = this.state.baseBill;
           baseBill.product = data.map(item => {
-            item['checked'] = item['checked'] ? item['checked'] : true;
+            item['checked'] = goods_id === item.goods_id || item['checked']  ? true : goods_id === '' ? true : false;
             item['showDetail'] = item['showDetail'] ? item['showDetail'] : false;
             return item;
           });
@@ -85,16 +85,16 @@ class Buy extends PureComponent {
           // 处理登录错误
           throw error;
         }
-      } else if (this.props.params.historyId) {
+      } else if (this.props.params.historyId && this.props.params.historyId!=='null') {
         try {
           const { value: { status, msg, data }} = await actions.geneGoodsList({
             body: {},
           });
-          console.log(data,'data2');
           const baseBill = this.state.baseBill;
+          const historyPerson = this.state.historyPerson;
           const billsList = [];
           baseBill.product = data.map(item => {
-            item['checked'] = item['checked'] ? item['checked'] : true;
+            item['checked'] = goods_id === item.goods_id || item['checked']  ? true : goods_id === '' ? true : false;
             item['showDetail'] = item['showDetail'] ? item['showDetail'] : false;
             return item;
           });
@@ -103,7 +103,7 @@ class Buy extends PureComponent {
           this.setState({
             billsList,
           });
-          this.clickName(historyPersonData.filter(item => item.bind_id === this.props.params.historyId)[0]);
+          this.clickName(historyPerson.filter(item => item.bind_id === parseInt(this.props.params.historyId))[0]);
         } catch (error) {
           // 处理登录错误
           throw error;
@@ -113,13 +113,10 @@ class Buy extends PureComponent {
           const { value: { status, msg, data }} = await actions.geneGoodsList({
             body: {},
           });
-          console.log(status,'status3');
-          console.log(msg,'msg3');
-          console.log(data,'data3');
           const baseBill = this.state.baseBill;
           const billsList = [];
           baseBill.product = data.map(item => {
-            item['checked'] = item['checked'] ? item['checked'] : true;
+            item['checked'] =  goods_id === item.goods_id || item['checked']  ? true : goods_id === '' ? true : false;
             item['showDetail'] = item['showDetail'] ? item['showDetail'] : false;
             return item;
           });
@@ -140,37 +137,49 @@ class Buy extends PureComponent {
   }
   clickName = item => {
     let array = this.state.cur;
+    let billsListArray = [];
     let { baseBill, billsList } = this.state;
     let status = true;
 
     if (billsList[0].bind_id === '' && billsList[0].real_name === '' && billsList.length === 1) {
       array.push(item.bind_id);
-      billsList[0] = Object.assign({}, JSON.parse(JSON.stringify(baseBill)), item, { disabled: true });
-    }else{
-      billsList = billsList.filter(key => {
+      billsListArray.push(Object.assign({}, JSON.parse(JSON.stringify(baseBill)), item, { disabled: true }));
+    } else {
+      billsListArray = billsList.filter(key => {
         if (key.bind_id === item.bind_id) {
           status = false;
-          array = array.filter(j => (!j === item.bind_id));
+          array = array.filter(j => {
+            if(j === item.bind_id){
+              return false;
+            }else{
+              return true;
+            }
+          });
           return false;
         }
         return true;
       });
+      
       if (status) {
         array.push(item.bind_id);
-        billsList.push(Object.assign({}, JSON.parse(JSON.stringify(baseBill)), item, { disabled: true }));
+        billsListArray.push(Object.assign({}, JSON.parse(JSON.stringify(baseBill)), item, { disabled: true }));
       }
-      if (billsList.length === 0) {
-        billsList[0] = JSON.parse(JSON.stringify(baseBill));
+      if (billsListArray.length === 0) {
+        billsListArray[0] = JSON.parse(JSON.stringify(baseBill));
       }
     }
     this.setState({
       cur: array,
-      billsList,
+      billsList:billsListArray,
     });
   }
   addBill = () => {
     const baseBill = this.state.baseBill;
     let array = [];
+    baseBill.product.map(item=>{
+      item['checked'] = true;
+      return item;
+    });
     this.state.billsList.map(item => {
       array.push(item);
       return true;
@@ -296,9 +305,6 @@ class Buy extends PureComponent {
     actions.buyReducer(item);
     this.props.router.push('/address');
   }
-  renderContent = page => {
-    this.props.router.push(page);
-  }
   render() {
     const {
       historyPerson,
@@ -332,7 +338,7 @@ class Buy extends PureComponent {
       const editName = item.disabled ? 
         <div className="buy-bills-showname">
           <strong>{item.real_name}</strong>
-          <span className="icon icon-bianji" onClick={() => this.editName(item, i)}></span>
+          <span className="icon icon-bianji" style={{display:(item.bind_id > 0 ? 'none' : 'block')}} onClick={() => this.editName(item, i)}></span>
         </div>
       :
         <div className="buy-bills-input">
@@ -354,44 +360,36 @@ class Buy extends PureComponent {
 
     return (
       <div className="buy">
-        <div ref="navBar">
-          <NavBar
-            mode="dark"
-            icon={<Icon type="left" />}
-            onLeftClick={() => window.history.go(-1)}>
-          购买
-          </NavBar>
-        </div>
-        <div style={{overflowX: 'scroll',height: document.documentElement.clientHeight - (this.refs.tabBarTmp ? parseInt(this.refs.tabBarTmp.offsetHeight) : 50) - (this.refs.navBar ? parseInt(this.refs.navBar.offsetHeight) : 50)}}>
-          <div className='buy-inspector' style={{display: historyPerson.length > 0 ? 'block' : 'none'}}>
-            <h2><span>历史检测人</span><Popover
-                overlayClassName="fortest"
-                visible={false}
-                overlay={[
-                  (<div className="popover-div">提示语A</div>)
-                ]}
-                align={{
-                  overflow: { adjustY: 1, adjustX: 1 },
-                  offset: [13, 10],
-                }}
-              >
-                <span className="icon icon-wenhao" onClick={e=>{}}></span>
-              </Popover></h2>
-            <div className='buy-inspector-lable'>
-              {historyPersonTmp}
-            </div>
+        <NavBar
+          mode="dark"
+          icon={<Icon type="left" />}
+          onLeftClick={() => window.history.go(-1)}
+        >购买</NavBar>
+        <div className='buy-inspector' style={{display: historyPerson.length > 0 ? 'block' : 'none'}}>
+          <h2><span>历史检测人</span><Popover
+              overlayClassName="fortest"
+              visible={false}
+              overlay={[
+                (<div className="popover-div">提示语A</div>)
+              ]}
+              align={{
+                overflow: { adjustY: 1, adjustX: 1 },
+                offset: [13, 10],
+              }}
+            >
+              <span className="icon icon-wenhao" onClick={e=>{}}></span>
+            </Popover></h2>
+          <div className='buy-inspector-lable'>
+            {historyPersonTmp}
           </div>
-          <div className="buy-content">
-            {billsListTmp}
-          </div>
-          <div className="buy-bill-add">
-            <div className="buy-bill-add-content" onClick={this.addBill}>新增检测人</div>
-          </div>
-          <BuyAccount total={this.countTotal()} submit={this.submit}/>
         </div>
-        <div ref="tabBarTmp">
-          <TabBarItem page='buy' render={this.renderContent}  />
+        <div className="buy-content">
+          {billsListTmp}
         </div>
+        <div className="buy-bill-add">
+          <div className="buy-bill-add-content" onClick={this.addBill}>新增检测人</div>
+        </div>
+        <BuyAccount total={this.countTotal()} submit={this.submit}/>
       </div>
     );
   }

@@ -5,7 +5,6 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n';
 import './util/polyfill';
 import './util/DOMUtils';
-import './util/DOMUtils';
 
 
 // 这里添加 ga 啊百度统计的代码

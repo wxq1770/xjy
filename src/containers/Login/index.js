@@ -11,7 +11,6 @@ import {
   sendLoginCode,
   loginForm,
   checkVerifyCode,
-  //userStore,
 } from './actions';
 import Agree from '../../components/Agree';
 import './index.less';
@@ -26,6 +25,7 @@ class Login extends PureComponent {
       window.location.pathname + window.location.hash,
     );
     super(props);
+    this.link = this.props.location.query.target ? this.props.location.query.target : '';
     this.state = {
       submitting: false,
       phone: '',
@@ -168,8 +168,11 @@ class Login extends PureComponent {
           },
         });
         if (status === 1) {
-          router.replace('/');
-          //actions.userStore(true);
+          if (this.link !== '') {
+            router.replace(this.link);
+          }else{
+            router.replace('/');
+          }
         } else {
           Toast.fail(msg, 2);
           this.setState({
@@ -177,6 +180,7 @@ class Login extends PureComponent {
             submitting: false,
           });
         }
+        clearInterval(this.interval);
       } catch (error) {
         // 处理登录错误
         throw error;
@@ -363,6 +367,5 @@ export default createForm()(translate()(connect(() => ({
     sendLoginCode: bindActionCreators(sendLoginCode, dispatch),
     loginForm: bindActionCreators(loginForm, dispatch),
     checkVerifyCode: bindActionCreators(checkVerifyCode, dispatch),
-    //userStore: bindActionCreators(userStore, dispatch),
   },
 }))(toJS(Login))));

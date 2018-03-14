@@ -74,6 +74,16 @@ class Result extends PureComponent {
         </p>
         <span className="result-content-btn" onClick={this.back}>重新支付</span>
       </div>
+    }else if(page === 'binding' && status === 'succeed'){
+      content = <div>
+        <h4>绑定成功！</h4>
+        <p>
+          请您将样本包装好邮寄给我们<br/>
+          小基因会尽快给您出报告的
+        </p>
+        <span className="result-content-btn" onClick={()=>{this.props.router.push('/index')}}>返回首页</span>
+        <span className="result-content-btn" onClick={()=>{this.props.router.push('/index')}}>查看进度</span>
+      </div>
     }
     return (
       <div className="result">

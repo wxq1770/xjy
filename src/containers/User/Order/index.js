@@ -7,6 +7,7 @@ import { createForm } from 'rc-form';
 import toJS from '../../../libs/toJS';
 import {
   orderList,
+  getPayParamer,
 } from './actions';
 import './index.less';
 
@@ -69,23 +70,60 @@ class UserOrder extends PureComponent {
       throw error;
     }
   }
-  pay = () => {
-    console.log('支付');
-  }
   details = item => {
     this.props.router.push(`/user/order/details/${item.order_id}`);
+  }
+  payment = async (rowData) => {
+    const { actions } = this.props;
+    try {
+      const { value: { status, msg, data }} = await actions.getPayParamer({
+        body: {
+          order_id: rowData.order_id,
+        },
+      });
+      if (status === 1009) {
+        Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
+      }if(status === 1) {
+        window.WeixinJSBridge.invoke(
+          'getBrandWCPayRequest', data
+          , (res) => {
+            // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+            if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
+
+              //'/result/address/historyperson'
+              //'/result/address/succeed'
+
+              Toast.info('购买成功', 2, () => { this.props.router.push('/result/address/succeed'); });
+              this.details();
+              actions.clearStore();
+              actions.clearStoreBuy();
+            }else if( res.err_msg == "get_brand_wcpay_request:fail" ) {
+              Toast.info('支付失败', 3, () => this.props.router.push('/result/address/fail'));
+            }
+            this.setState({
+              modal: false,
+            });
+          },
+        );
+      }else{
+        Toast.info(msg);
+      }
+    } catch (error) {
+      // 处理登录错误
+      throw error;
+    }
   }
   render() {
     const row = (rowData, sectionID, rowID) => {
       return (
-        <div className="product-info" key={rowID} onClick={() => this.details(rowData)}>
-          <div className="product-info-header">
+        <div className="product-info" key={rowID} >
+          <div className="product-info-header" onClick={() => this.details(rowData)}>
             <span className="product-info-header-left">订单号：{rowData.order_sn}</span>
             <span className="product-info-header-right"><span>{rowData.status_name}</span><Icon type="right" /></span>
           </div>
           {
             rowData.gene_list.map((item, i) => {
-              return <div className="product-info-content" key={i}>
+              return <div className="product-info-content" key={i} onClick={() => this.details(rowData)}>
                 <div className="product-info-content-left">
                   <span className="color-666">检测人：{item.remark}</span>
                   <span>检测包含：{item.goods_names}</span>
@@ -95,8 +133,8 @@ class UserOrder extends PureComponent {
             })
           }
           <div className="footer-btn">
-            <div className="footer-btn-right" onClick={this.pay} style={{ display: rowData.status_name === '待支付' ? 'blcok' : 'none' }}>
-              <span className="footer-btn-span">立即付款</span>
+            <div className="footer-btn-right" style={{ display: rowData.status_name === '待支付' ? 'blcok' : 'none' }}>
+              <span className="footer-btn-span" onClick={this.payment.bind(this,rowData)}>立即付款</span>
             </div>
             <div className="footer-btn-money">
               合计付款：{rowData.order_amount}元
@@ -134,5 +172,6 @@ export default createForm()(translate()(connect(() => ({
 }), dispatch => ({
   actions: {
     orderList: bindActionCreators(orderList, dispatch),
+    getPayParamer: bindActionCreators(getPayParamer, dispatch),
   },
 }))(toJS(UserOrder))));

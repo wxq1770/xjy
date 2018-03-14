@@ -10,6 +10,11 @@ import {
   orderInfo,
   cancelOrder,
 } from './actions';
+
+import {
+  getPayParamer,
+} from '../Order/actions';
+
 import './index.less';
 
 class Order extends PureComponent {
@@ -83,6 +88,47 @@ class Order extends PureComponent {
 
   onCloseModal = () => {
     this.setState({ modal: false });
+  }
+
+  payment = async (rowData) => {
+    const { actions } = this.props;
+    try {
+      const { value: { status, msg, data }} = await actions.getPayParamer({
+        body: {
+          order_id: this.id,
+        },
+      });
+      if (status === 1009) {
+        Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
+      }if(status === 1) {
+        window.WeixinJSBridge.invoke(
+          'getBrandWCPayRequest', data
+          , (res) => {
+            // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+            if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
+
+              //'/result/address/historyperson'
+              //'/result/address/succeed'
+
+              Toast.info('购买成功', 2, () => { this.props.router.push('/result/address/succeed'); });
+              this.details();
+              actions.clearStore();
+              actions.clearStoreBuy();
+            }else if( res.err_msg == "get_brand_wcpay_request:fail" ) {
+              Toast.info('支付失败', 3, () => this.props.router.push('/result/address/fail'));
+            }
+            this.setState({
+              modal: false,
+            });
+          },
+        );
+      }else{
+        Toast.info(msg);
+      }
+    } catch (error) {
+      // 处理登录错误
+      throw error;
+    }
   }
 
   render() {
@@ -179,7 +225,7 @@ class Order extends PureComponent {
           </div>
           <div className="footer-btn-right" style={{ display: details.status_name === '待支付' ? 'block' : 'none' }}>
             <span onClick={() => this.cancelOrder(details)}>取消订单</span>
-            <span className="footer-btn-span" onClick={() => this.pay(details)}>立即付款</span>
+            <span className="footer-btn-span" onClick={this.payment}>立即付款</span>
           </div>
         </div>
         <Modal
@@ -195,8 +241,7 @@ class Order extends PureComponent {
           }, {
             text: '确定',
             onPress: this.onPress,
-          }]}
-          wrapProps={{ onTouchStart: this.onWrapTouchStart }}>
+          }]}>
           <div>
             <div style={{ padding: '0.5rem' }}>您确定要取消订单吗？</div>
           </div>
@@ -211,5 +256,6 @@ export default createForm()(translate()(connect(() => ({
   actions: {
     orderInfo: bindActionCreators(orderInfo, dispatch),
     cancelOrder: bindActionCreators(cancelOrder, dispatch),
+    getPayParamer: bindActionCreators(getPayParamer, dispatch),
   },
 }))(toJS(Order))));

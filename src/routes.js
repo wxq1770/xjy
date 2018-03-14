@@ -9,7 +9,13 @@ import Result from './containers/Result';
 import Address from './containers/Address';
 import Binding from './containers/Binding';
 import Index from './containers/Index';
-import Details from './containers/Details';
+import Guide from './containers/Guide';
+import ReportList from './containers/Report/List';
+import ReportIndex from './containers/Report/Index';
+import ReportInit from './containers/Report/Init';
+import ReportDemo from './containers/Report/Demo';
+import ReportProgress from './containers/Report/Progress';
+import ReportDetail from './containers/Report/Detail';
 import BindingRecord from './containers/BindingRecord';
 import UserOrder from './containers/User/Order';
 import Order from './containers/User/OrderDetails';
@@ -25,7 +31,11 @@ const validate = (getState, dispatch) => {
         body: {},
       }));
       if (data.is_login !== 1) {
-        replace('/login');
+        if(location.location.pathname !== '/login'){
+          replace('/login?target='+location.location.pathname);
+        }else{
+          replace('/login');
+        }
       }
       callback();
     } catch (error) {
@@ -41,7 +51,12 @@ const loginState = (getState, dispatch) => {
         body: {},
       }));
       if (data.is_login === 1) {
-        replace('/index');
+        //console.log('33333',location.search,location.query.target);
+        if(location.location.search !== '' && location.location.query.target){
+          replace(location.location.query.target);
+        }else{
+          replace('/index');
+        }
       }
       callback();
     } catch (error) {
@@ -65,10 +80,18 @@ export default function createRoutes({ getState, dispatch }) {
         <IndexRoute onEnter={redirect(getState, dispatch)} />
         <Route path="login" component={Login} onEnter={loginState(getState, dispatch)}/>
         <Route path="index" component={Index} />
-        <Route path="details" component={Details} />
+        <Route path="guide" component={Guide} />
         <Route path="register" component={Register} />
-        <Route path="buy(/:historyId)" component={Buy} />
+        <Route path="buy(/:historyId)(/:goods_id)" component={Buy} />
         <Route path="address" component={Address} />
+        <Route path="report" >
+          <Route path="index" component={ReportIndex} />
+          <Route path="demo" component={ReportDemo} />
+          <Route path="list" component={ReportInit} />
+          <Route path="init" component={ReportList} />
+          <Route path="detail(/:inspector_id)(/:goods_id)(/:bind_id)" component={ReportDetail} />
+          <Route path="progress(/:inspector_id)(/:goods_id)(/:bind_id)" component={ReportProgress} onEnter={validate(getState, dispatch)} />
+        </Route>
         <Route path="result/:page/:status" component={Result} onEnter={validate(getState, dispatch)} />
         <Route path="binding" component={Binding} onEnter={validate(getState, dispatch)} />
         <Route path="bindingrecord" component={BindingRecord} onEnter={validate(getState, dispatch)} />

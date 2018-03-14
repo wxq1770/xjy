@@ -2,3 +2,7 @@
 export const ADD_ORDER = 'ADD_ORDER';
 export const ADD_ORDER_SUCCESS = 'ADD_ORDER_SUCCESS';
 export const ADD_ORDER_ERROR = 'ADD_ORDER_ERROR';
+
+export const PAY_PARAMER = 'PAY_PARAMER';
+export const PAY_PARAMER_SUCCESS = 'PAY_PARAMER_SUCCESS';
+export const PAY_PARAMER_ERROR = 'PAY_PARAMER_ERROR';

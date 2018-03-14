@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { translate } from 'react-i18next';
 import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
-import { NavBar, Icon, Checkbox,Picker, NoticeBar, List, InputItem , Toast } from 'antd-mobile';
+import { NavBar, Icon, Checkbox, Picker, NoticeBar, List, InputItem, Toast, Modal } from 'antd-mobile';
 import { createForm } from 'rc-form';
 import BuyAccount from '../../components/BuyAccount';
 import toJS from '../../libs/toJS';
@@ -10,6 +10,7 @@ import {
   addOrder,
   addressReducer,
   clearStore,
+  getPayParamer,
 } from './actions';
 
 import {
@@ -20,41 +21,42 @@ import './index.less';
 const list = require('china-location/dist/location.json');
 const AgreeItem = Checkbox.AgreeItem;
 
-const array =[]
+const array = [];
 
-for(let item in list){
+for (let item in list) {
   array.push({
-    value : list[item].code,
-    label : list[item].name,
-    children : list[item].cities
-  })
+    value: list[item].code,
+    label: list[item].name,
+    children: list[item].cities,
+  });
 }
 
-array.map((item)=>{
+array.map(item => {
   const array = [];
-  for(let i in item.children){
+  for (let i in item.children) {
     array.push({
-      value : item.children[i].code,
-      label : item.children[i].name,
-      children : item.children[i].districts,
-    })
+      value: item.children[i].code,
+      label: item.children[i].name,
+      children: item.children[i].districts,
+    });
   }
   item.children = array;
   return item;
-})
+});
 
-array.map((item)=>{
-  item.children.map((key)=>{
+array.map(item => {
+  item.children.map(key => {
     const array = [];
-    for(let i in key.children){
+    for (let i in key.children) {
       array.push({
-        value : i,
-        label : key.children[i]
+        value: i,
+        label: key.children[i],
       });
     }
-    key.children = array
-  })
-})
+    key.children = array;
+  });
+});
+
 class Address extends PureComponent {
 
   constructor(props) {
@@ -68,6 +70,9 @@ class Address extends PureComponent {
       submitting: false,
       historyPerson: [],
       tab: 0,
+      modal: false,
+      link: '',
+      order_id: '',
     };
   }
 
@@ -116,6 +121,7 @@ class Address extends PureComponent {
         const list = this.props.buyReducer.map(item => {
           return {
             remark: item.real_name,
+            history_id: item.bind_id ? item.bind_id : 0,
             goods_ids: item.product.filter(item => {
               if (item.checked) {
                 return true;
@@ -124,11 +130,13 @@ class Address extends PureComponent {
             }),
           };
         });
+
         const { value: {status, msg, data }} = await actions.addOrder({
           body: {
             list: list.map(item => {
               return {
                 remark: item.remark,
+                history_id: item.history_id,
                 goods_ids: item.goods_ids.map(item => item.goods_id).join(','),
               };
             }),
@@ -144,15 +152,20 @@ class Address extends PureComponent {
           },
         });
         if (status === 1009) {
-          Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login'));
+          Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
         } else if (status === 1 && this.state.historyPerson.length === this.props.buyReducer.length) {
-          actions.clearStore();
-          actions.clearStoreBuy();
-          this.props.router.push('/result/address/historyperson');
+          this.setState({ 
+            link: '/result/address/historyperson',
+            order_id: data.order_id,
+          });
+          this.onPress('/result/address/historyperson', data.order_id);
         } else if (status === 1) {
-          actions.clearStore();
-          actions.clearStoreBuy();
-          this.props.router.push('/result/address/succeed');
+          this.setState({ 
+            modal: true,
+            link: '/result/address/succeed',
+            order_id: data.order_id,
+          });
+          this.onPress('/result/address/succeed', data.order_id);
         } else if (status !== 1) {
           this.props.router.push('/result/address/fail');
         } else {
@@ -177,6 +190,46 @@ class Address extends PureComponent {
     this.props.form.setFieldsValue({
       [type]: value,
     });
+  }
+  onCloseModal = () => {
+    this.setState({ modal: false });
+    this.props.router.push('/result/address/fail');
+  }
+  onPress = async (url, order_id) => {
+    const { actions } = this.props;
+    try {
+      const { value: { status, msg, data }} = await actions.getPayParamer({
+        body: {
+          order_id: order_id,
+        },
+      });
+      if (status === 1009) {
+        Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
+      }if(status === 1) {
+        window.WeixinJSBridge.invoke(
+          'getBrandWCPayRequest', data
+          , (res) => {
+            // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+            if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
+              Toast.info('购买成功', 2, () => { this.props.router.push(url); });
+              this.details();
+              actions.clearStore();
+              actions.clearStoreBuy();
+            }else if( res.err_msg == "get_brand_wcpay_request:fail" ) {
+              Toast.info('支付失败', 3, () => this.props.router.push('/result/address/fail'));
+            }
+            this.setState({
+              modal: false,
+            });
+          },
+        );
+      }else{
+        Toast.info(msg);
+      }
+    } catch (error) {
+      // 处理登录错误
+      throw error;
+    }
   }
   render() {
     const { getFieldProps, getFieldError } = this.props.form;
@@ -310,6 +363,14 @@ class Address extends PureComponent {
         </div>
         :
         '';
+      const Invoice = <div></div> || <dl className="address-pay-invoice">
+        <dt>电子发票</dt>
+        <dd>
+          <span className={"a-p-i-label "+(tabValue === 0 ? 'cur' : '')} onClick={this.tab.bind(this,0)}>不需要</span>
+          <span className={"a-p-i-label "+(tabValue === 1 ? 'cur' : '')} onClick={this.tab.bind(this,1)}>个人</span>
+          <span className={"a-p-i-label "+(tabValue === 2 ? 'cur' : '')} onClick={this.tab.bind(this,2)}>公司</span>
+        </dd>
+      </dl>
     return (
       <div className="address">
         <NavBar
@@ -327,14 +388,7 @@ class Address extends PureComponent {
               <span className={"icon-weixin cur"}>微信支付</span>
             </dd>
           </dl>
-          <dl className="address-pay-invoice">
-            <dt>电子发票</dt>
-            <dd>
-              <span className={"a-p-i-label "+(tabValue === 0 ? 'cur' : '')} onClick={this.tab.bind(this,0)}>不需要</span>
-              <span className={"a-p-i-label "+(tabValue === 1 ? 'cur' : '')} onClick={this.tab.bind(this,1)}>个人</span>
-              <span className={"a-p-i-label "+(tabValue === 2 ? 'cur' : '')} onClick={this.tab.bind(this,2)}>公司</span>
-            </dd>
-          </dl>
+          {Invoice}
         </div>
         <List>
           {tab}
@@ -362,5 +416,6 @@ export default createForm()(translate()(connect(state => ({
     addressReducer: bindActionCreators(addressReducer, dispatch),
     clearStore: bindActionCreators(clearStore, dispatch),
     clearStoreBuy: bindActionCreators(clearStoreBuy, dispatch),
+    getPayParamer: bindActionCreators(getPayParamer, dispatch),
   },
 }))(toJS(Address))));

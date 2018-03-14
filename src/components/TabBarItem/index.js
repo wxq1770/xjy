@@ -20,85 +20,53 @@ class TabBarItem extends PureComponent {
     return (
     <TabBar
         unselectedTintColor="#7a7a7a"
-        tintColor="#1f69b4"
+        tintColor="#2ABEC4"
       >
         <TabBar.Item
           title={'首页'}
           icon={
-            <div style={{
-              width: '22px',
-              height: '22px',
-              background: 'url(../../../../img/beijing.png) center center /  21px 21px no-repeat' }}
-            />
+            <div className="shouyehui" />
           }
           selectedIcon={
-            <div style={{
-              width: '22px',
-              height: '22px',
-              background: 'url(../../../../img/beijing.png) center center /  21px 21px no-repeat' }}
-            />
+            <div className="shouye" />
           }
-          selected={this.props.page === 'index'}
+          selected={this.props.page === '/index'}
           onPress={this.renderContent.bind(this,'/index')}
         >
         </TabBar.Item>
         <TabBar.Item
           title={'购买'}
           icon={
-            <div style={{
-              width: '22px',
-              height: '22px',
-              background: 'url(../../../../img/beijing.png) center center /  21px 21px no-repeat' }}
-            />
+            <div className="goumaihui" />
           }
           selectedIcon={
-            <div style={{
-              width: '22px',
-              height: '22px',
-              background: 'url(../../../../img/beijing.png) center center /  21px 21px no-repeat' }}
-            />
+            <div className="goumai" />
           }
-          selected={this.props.page === 'buy'}
+          selected={this.props.page === '/buy'}
           onPress={this.renderContent.bind(this,'/buy')}
         >
         </TabBar.Item>
         <TabBar.Item
           title={'报告'}
           icon={
-            <div style={{
-              width: '22px',
-              height: '22px',
-              background: 'url(../../../../img/beijing.png) center center /  21px 21px no-repeat' }}
-            />
+            <div className="baogaohui" />
           }
           selectedIcon={
-            <div style={{
-              width: '22px',
-              height: '22px',
-              background: 'url(../../../../img/beijing.png) center center /  21px 21px no-repeat' }}
-            />
+            <div className="baogao" />
           }
-          selected={this.props.page === 'details'}
-          onPress={this.renderContent.bind(this,'/details')}
+          selected={this.props.page === '/report/list'}
+          onPress={this.renderContent.bind(this,'/report/list')}
         >
         </TabBar.Item>
         <TabBar.Item
           title={'我的'}
           icon={
-            <div style={{
-              width: '22px',
-              height: '22px',
-              background: 'url(../../../../img/beijing.png) center center /  21px 21px no-repeat' }}
-            />
+            <div className="wodehui" />
           }
           selectedIcon={
-            <div style={{
-              width: '22px',
-              height: '22px',
-              background: 'url(../../../../img/beijing.png) center center /  21px 21px no-repeat' }}
-            />
+            <div className="wode" />
           }
-          selected={this.props.page === 'user'}
+          selected={this.props.page === '/user'}
           onPress={this.renderContent.bind(this)}
         >
         </TabBar.Item>
