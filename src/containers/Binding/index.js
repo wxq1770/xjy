@@ -4,7 +4,7 @@ import { translate } from 'react-i18next';
 import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
 import moment from 'moment';
-import { NavBar, Icon, Picker, List, InputItem, Toast, DatePicker, ActionSheet } from 'antd-mobile';
+import { NavBar, Icon, Picker, List, InputItem, Toast, DatePicker, Popover, ActionSheet } from 'antd-mobile';
 import { createForm } from 'rc-form';
 import toJS from '../../libs/toJS';
 
@@ -12,6 +12,7 @@ import {
   binding,
   unbindList,
   getSignPackage,
+  selfBinded,
 } from './actions';
 
 import './index.less';
@@ -26,31 +27,6 @@ if (isIPhone) {
     onTouchStart: e => e.preventDefault(),
   };
 }
-const relation = [{
-  value: '1',
-  label: '本人',
-}, {
-  value: '2',
-  label: '配偶',
-}, {
-  value: '3',
-  label: '父母',
-}, {
-  value: '4',
-  label: '祖父母',
-}, {
-  value: '5',
-  label: '兄弟姐妹',
-}, {
-  value: '6',
-  label: '子女',
-}, {
-  value: '7',
-  label: '朋友',
-}, {
-  value: '8',
-  label: '其它',
-}];
 
 const sex = [{
   value: '1',
@@ -251,12 +227,41 @@ class Binding extends PureComponent {
     this.state = {
       locale,
       relation: '',
+      relationArr: [{
+        value: '1',
+        label: '本人',
+      }, {
+        value: '2',
+        label: '配偶',
+      }, {
+        value: '3',
+        label: '父母',
+      }, {
+        value: '4',
+        label: '祖父母',
+      }, {
+        value: '5',
+        label: '兄弟姐妹',
+      }, {
+        value: '6',
+        label: '子女',
+      }, {
+        value: '7',
+        label: '朋友',
+      }, {
+        value: '8',
+        label: '其它',
+      }],
       sex: '',
       nation: '',
       birthday: '',
       sValue: '',
       date: '',
       checkCode: [],
+      check_status: false,
+      is_binded:0,
+      unbindList:[],
+      actionSheetStatus:false,
     };
   }
 
@@ -264,8 +269,11 @@ class Binding extends PureComponent {
     if (navigator.platform.indexOf('Win') > -1) {
       document.body.classList.add('windows');
     }
+
     const { actions } = this.props;
     let array = [];
+    this.unbindList();
+    this.selfBinded();
     const { value: {status, msg, data }} = await actions.getSignPackage({
       body: {
         url: "http://www.minigene.net/",
@@ -276,7 +284,40 @@ class Binding extends PureComponent {
       'scanQRCode'
     ];
     obj['debug'] = false;
+
     window.wx.config(obj);
+  }
+
+  selfBinded  = async () => {
+    const { actions } = this.props;
+    const { relationArr } = this.state;
+    const { value: {status, msg, data }} = await actions.selfBinded({
+      body: {},
+    });
+    if(status === 1 && data.is_binded === 1){
+      relationArr.shift();
+    }
+    this.setState({
+      is_binded : status === 1 && data.is_binded ? data.is_binded : 0,
+      relationArr,
+    });
+  }
+
+  unbindList = async () => {
+    const { actions } = this.props;
+    const { value: {status, msg, data }} = await actions.unbindList({
+      body: {},
+    });
+
+    if(status === 1 && data.list.length > 0){
+      this.setState({
+        check_status: true,
+      });
+    }else{
+      this.setState({
+        check_status: false,
+      });
+    }
   }
 
   onChange = (type, value) => {
@@ -294,13 +335,13 @@ class Binding extends PureComponent {
     this.props.form.validateFields((error, item) => {
       if(error){
         if(error.relation){
-          Toast.info(getFieldError('relation'), 2);
+          Toast.info(getFieldError('relation'), 3);
         }else if(error.sex){
-          Toast.info(getFieldError('sex'), 2);
+          Toast.info(getFieldError('sex'), 3);
         }else if(error.nation){
-          Toast.info(getFieldError('nation'), 2);
+          Toast.info(getFieldError('nation'), 3);
         }else if(error.birthday){
-          Toast.info(getFieldError('birthday'), 2);
+          Toast.info(getFieldError('birthday'), 3);
         }
       }
       if (!error) {
@@ -323,43 +364,24 @@ class Binding extends PureComponent {
       if (status === 1009) {
         Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/binding'));
       } else if (status === 1) {
-        this.props.router.push('/result/binding/succeed');
+        this.props.router.push('/result/binding/succeed/'+data.bind_id);
       } else {
-        Toast.info(msg, 2);
+        Toast.info(msg, 3);
       }
     }
   }
   checkCode = async () => {
-
     const { actions } = this.props;
     let array = [];
     const { value: {status, msg, data }} = await actions.unbindList({
       body: {},
     });
-
     if(status === 1){
-      array.push(data.map(item => '昵称：'+item.remark+'检测密码：'+item.check_code));
+      this.setState({
+        unbindList: data.list,
+        actionSheetStatus:true,
+      });
     }
-    //array = ['昵称：张三 检测密码：123102301','昵称：张三 检测密码：123102301'];
-    const BUTTONS = array;
-    BUTTONS.push('取消');
-
-    ActionSheet.showActionSheetWithOptions({
-      options: BUTTONS,
-      cancelButtonIndex: BUTTONS.length - 1,
-      message: '请选择已有的检测密码',
-      maskClosable: true,
-      'data-seed': 'logId',
-      wrapProps,
-    },
-    (buttonIndex) => {
-      const text = array[buttonIndex];
-      if(text !== '取消'){
-        this.props.form.setFieldsValue({
-          check_code : text.split('：')[2],
-        });
-      }
-    });
   }
   scanQRCode = () => {
     let that = this;
@@ -373,18 +395,42 @@ class Binding extends PureComponent {
       }
     });
   }
+  select = item =>{
+    this.props.form.setFieldsValue({
+      check_code : item.check_code
+    });
+    this.setState({
+      actionSheetStatus: false,
+    })
+  }
+  close = () =>{
+    this.setState({
+      actionSheetStatus: false,
+    })
+  }
   render() {
 
     const { getFieldProps, getFieldError } = this.props.form;
-
+    const { check_status, relationArr, unbindList, actionSheetStatus } = this.state;
+    const tmp = unbindList.map((item,index)=> {
+      return <div className="actionSheet-li" key={index} onClick={this.select.bind(this,item)}>
+        <span className="fl"><strong>检测人备注：</strong>{item.remark}</span>
+        <span className="fr"><strong>检测密码：</strong>{item.check_code}</span>
+      </div>
+    });
     return (
       <div className="binding">
+        <div className="actionSheet-warp-bj" style={{display:(actionSheetStatus ? 'block' : 'none')}} onClick={this.close}></div>
+        <div className={"actionSheet-warp overflow-scrolling animated "+(actionSheetStatus ? 'slideInUp ' : 'slideOutDown' )} style={{maxHeight : document.documentElement.clientHeight}}>
+          <div className="actionSheet-warp-header">请根据备注选择检测密码</div>
+          {tmp}
+        </div>
         <NavBar
           mode="dark"
           icon={<Icon type="left" />}
-          onLeftClick={() => this.props.router.push('/')}
+          onLeftClick={() => window.history.go(-1)}
           rightContent={<span onClick={() => this.props.router.push('/bindingrecord')}>绑定记录</span>}>
-          购买
+          绑定样本
         </NavBar>
         <div className="form-style-1">
           <div className="form-style-1-item">
@@ -393,11 +439,11 @@ class Binding extends PureComponent {
               <InputItem
                 {...getFieldProps('sample_code',
                   {
-                    rules: [{ required: true, message: '请输入样本码' }],
+                    rules: [{ required: true, message: '请输入/扫一扫样本码' }],
                   },
                 )}
                 clear
-                placeholder="样本码"
+                placeholder="请输入/扫一扫样本码"
                 error={getFieldError('sample_code')}
                 onErrorClick={()=>{Toast.info(getFieldError('sample_code'), 2)}}
                 onChange={(v) => {this.onChange('sample_code', v)}}
@@ -407,22 +453,37 @@ class Binding extends PureComponent {
             </div>
           </div>
           <div className="form-style-1-item">
-            <label>检测密码</label>
-            <div className="form-style-1-input">
+            <label className="popover-label"><span className="popover-span">检测密码</span>
+            <Popover
+              overlayClassName="fortest"
+              visible={false}
+              placement={'right'}
+              overlay={[
+                (<div className="popover-div">请向帮您购买产品的亲友索要</div>)
+              ]}
+              align={{
+                overflow: { adjustY: 1, adjustX: 1 },
+                offset: [10, -2],
+              }}
+            >
+              <span className="icon icon-wenhao" onClick={e=>{}} style={{display:check_status ?'none':'block' }}></span>
+            </Popover>
+            </label>
+            <div className={check_status ? 'form-style-1-input' : 'form-style-1-input-1'}>
               <InputItem
                 {...getFieldProps('check_code',
                   {
-                    rules: [{ required: true, message: '请输入检测密码' }],
+                    rules: [{ required: true, message: check_status ? '请选择检测密码' : '请输入检测密码' }],
                   },
                 )}
                 clear
-                placeholder="检测密码"
+                placeholder={check_status ? '请选择检测密码' : '请输入检测密码'}
                 error={getFieldError('check_code')}
                 onErrorClick={()=>{Toast.info(getFieldError('check_code'), 2)}}
                 onChange={(v) => {this.onChange('check_code', v)}}
                 maxLength={20} >
               </InputItem>
-              <span className="form-style-1-input-btn" onClick={this.checkCode}>查看</span>
+              <span className="form-style-1-input-btn" style={{display:(check_status ? 'block' : 'none')}} onClick={this.checkCode}>查看</span>
             </div>
           </div>
           <div className="form-style-1-item">
@@ -431,11 +492,11 @@ class Binding extends PureComponent {
               <InputItem
                 {...getFieldProps('real_name',
                   {
-                    rules: [{ required: true, message: '请输入检测人姓名' }],
+                    rules: [{ required: true, message: '请输入检测人真实姓名' }],
                   },
                 )}
                 clear
-                placeholder="检测人姓名"
+                placeholder="请输入检测人真实姓名"
                 error={getFieldError('real_name')}
                 onErrorClick={()=>{Toast.info(getFieldError('real_name'), 2)}}
                 onChange={(v) => {this.onChange('real_name', v)}}
@@ -447,15 +508,15 @@ class Binding extends PureComponent {
           <Picker
             {...getFieldProps('relation',
               {
-                rules: [{ required: true, message: '请选择与本人关系' }],
+                rules: [{ required: true, message: '请选择样本来源' }],
               },
             )}
             cols={1}
-            data={relation}
+            data={relationArr}
             className="forss"
-            extra="请选择与本人关系"
+            extra="请选择样本来源"
             onOk={v => this.setState({ relation: v })}>
-            <List.Item arrow="horizontal">与本人关系</List.Item>
+            <List.Item arrow="horizontal">样本来源</List.Item>
           </Picker>
           <Picker
             {...getFieldProps('sex',
@@ -492,7 +553,7 @@ class Binding extends PureComponent {
               },
             )}
             mode="date"
-            title="选择出生日期"
+            title=""
             extra="请选择出生日期"
             minDate={minDate}
             maxDate={maxDate}
@@ -512,5 +573,6 @@ export default createForm()(translate()(connect(() => ({
     getSignPackage: bindActionCreators(getSignPackage, dispatch),
     binding: bindActionCreators(binding, dispatch),
     unbindList: bindActionCreators(unbindList, dispatch),
+    selfBinded: bindActionCreators(selfBinded, dispatch),
   },
 }))(toJS(Binding))));

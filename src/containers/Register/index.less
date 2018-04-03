@@ -1,7 +1,15 @@
 .register{
-  padding-top: 4.9rem;
+  padding-top: 1.8rem;
   background:url(../../../img/login-register-background@2x.png);
   background-size: cover;
+  .login-header{
+    width: 5.28rem;
+    height: 2.44rem;
+    background:url(../../../img/loginbj.png);
+    background-size: cover;
+    margin: 0 auto;
+    margin-bottom: 1rem;
+  }
   input{
     background:none;
     border:0;
@@ -69,28 +77,39 @@
       }
     }
     .form-protocol{
-      margin-top: 0.2rem;
-      text-align: center;
-      line-height: 0.18rem;
-      height: 0.6rem;
-      position: relative;
-
-      a{
+      width: 5.4rem;
+      margin:0 auto;
+      margin-top: 0.5rem;
+      overflow: hidden;
+      .protocol-warp{
         font-size: 0.26rem;
-        margin-top: 0.04rem;
         color: #55CBD0;
         display: block;
+        text-align: center;
       }
-      .am-checkbox-inner{
-        height: 0.35rem;
-        width: 0.35rem;
+      .icon-xuanzhong{
+        display: inline-block;
+        width: 0.99rem;
+        height: 0.32rem;
+        padding-left: 0.4rem;
+        background:url(../../../img/xuanzhong.png);
+        background-size: 0.32rem 0.32rem;
+        background-repeat: no-repeat;
       }
-      .am-checkbox-wrapper{
-        margin-left: 0.25rem;
-        line-height: 1.3;
+      .icon-weixuanzhong{
+        display: inline-block;
+        width: 0.99rem;
+        height: 0.32rem;
+        padding-left: 0.4rem;
+        background:url(../../../img/weixuanzhong.png);
+        background-size: 0.32rem 0.32rem;
+        background-repeat: no-repeat;
       }
-      .am-checkbox-agree{
-        margin-left: 0.8rem;
+      .form-error{
+        position: static;
+        display: block;
+        margin-top: 0.2rem;
+        text-align: center;
       }
     }
     .form-button{

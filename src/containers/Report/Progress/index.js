@@ -22,32 +22,59 @@ class ReportProgress extends PureComponent {
       window.location.pathname + window.location.hash,
     );
     super(props);
-    console.log(this.props.params);
     this.state = {
       inspector_id: this.props.params && this.props.params.inspector_id ? parseInt(this.props.params.inspector_id) : '',
       goods_id: this.props.params && this.props.params.goods_id ? parseInt(this.props.params.goods_id) : '',
-      bind_id: this.props.params && this.props.params.bind_id ? parseInt(this.props.params.bind_id) : '',
+      bind_id: props.bind_id ? props.bind_id  : this.props.params && this.props.params.bind_id ? parseInt(this.props.params.bind_id) : '',
       current_status: '',
+      userTitle:props.userTitle ? props.userTitle  : this.props.params && this.props.params.userTitle ? this.props.params.userTitle : '产品进度',
       list: [],
+      headerStatus: window.location.hash === '#/report/list' ? true : false,
     };
   }
   componentDidMount = async () => {
     const { actions } = this.props;
     const { bind_id } = this.state;
-    try {
-      const { value: { status, msg, data }} = await actions.progressInfo({
-        body: {
-          bind_id: bind_id,
-        },
-      });
+    if(bind_id === 'demo'){
       this.setState({
-        current_status: data.current_status,
-        list: data.list,
+        current_status: 0,
+        list: [{
+          check_status: 0,
+          title:'绑定样本',
+        },{
+          check_status: 1,
+          title:'收到样本',
+        },{
+          check_status: 2,
+          title:'提取DNA',
+        },{
+          check_status: 5,
+          title:'DNA质检<br/>上机检测',
+        },{
+          check_status: 6,
+          title:'数据解读',
+        },{
+          check_status: 7,
+          title:'生成报告',
+        }],
       });
+    }else{
+      try {
+        const { value: { status, msg, data }} = await actions.progressInfo({
+          body: {
+            bind_id: bind_id,
+          },
+        });
 
-    } catch (error) {
-      // 处理登录错误
-      throw error;
+        this.setState({
+          current_status: data.current_status,
+          list: data.list,
+        });
+
+      } catch (error) {
+        // 处理登录错误
+        throw error;
+      }
     }
   }
   binding = () => {
@@ -58,18 +85,27 @@ class ReportProgress extends PureComponent {
   render() {
     const { list, current_status } = this.state;
     let progressList = [];
+
     if(current_status === 0){
       progressList = list.map(( item, index )=>{
-        if(current_status === item.check_status && current_status === 0){
+        if(current_status === item.check_status && current_status === 0 && item.text !== '样本已成功绑定'){
           return <li className="list-progress-item" key={item.check_status}>
-            <span className="list-progress-item-title">{item.title}</span>
+            <span className="list-progress-item-title" dangerouslySetInnerHTML={{__html: item.title}}></span>
             <span className="list-progress-item-txt">您还没有绑定样本</span>
             <span className="list-progress-item-btn" onClick={this.binding}>立即绑定</span>
           </li>;
-        }else if(current_status+1 === item.check_status && current_status === 0){
+        }else if(item.text === '样本已成功绑定'){
+          return <li className="list-progress-item list-progress-item-ok" key={item.check_status}>
+            <span className="list-progress-item-title list-progress-item-title-ok" dangerouslySetInnerHTML={{__html: item.title}}></span>
+            <span className="list-progress-item-txt list-progress-item-txt-ok">{item.date} {item.text}</span>
+          </li>
+        }else if(item.check_status === 5){
           return <li className="list-progress-item" key={item.check_status}>
-            <span className="list-progress-item-title">{item.title}</span>
-            <span className="list-progress-item-txt">{item.text}</span>
+            <span className="list-progress-item-title" style={{paddingTop:'0.43rem',lineHeight:'0.4rem'}} dangerouslySetInnerHTML={{__html: item.title}}></span>
+          </li>;
+        }else{
+          return <li className="list-progress-item" key={item.check_status}>
+            <span className="list-progress-item-title" dangerouslySetInnerHTML={{__html: item.title}}></span>
           </li>;
         }
       });
@@ -77,12 +113,17 @@ class ReportProgress extends PureComponent {
       progressList = list.map(( item, index )=>{
         if(item.check_status === current_status && current_status === 8 ){
           return <li className="list-progress-item list-progress-item-fail" key={item.check_status}>
-            <span className="list-progress-item-title list-progress-item-title-fail">{item.title}</span>
+            <span className="list-progress-item-title list-progress-item-title-fail" dangerouslySetInnerHTML={{__html: item.title}}></span>
             <span className="list-progress-item-txt list-progress-item-txt-fail">{item.date} {item.text}</span>
           </li>;
-        }else if(item.check_status < 7 && current_status === 8 ){
+        }else if(item.check_status === 5){
           return <li className="list-progress-item list-progress-item-ok" key={item.check_status}>
-            <span className="list-progress-item-title list-progress-item-title-ok">{item.title}</span>
+            <span className="list-progress-item-title list-progress-item-title-ok" style={{paddingTop:'0.43rem',lineHeight:'0.4rem'}} dangerouslySetInnerHTML={{__html: item.title}}></span>
+            <span className="list-progress-item-txt list-progress-item-txt-ok" style={{paddingTop:'0.45rem',lineHeight:'0.4rem'}}>{item.date} {item.text}</span>
+          </li>;
+        }else if(item.check_status < 6 && current_status === 8 ){
+          return <li className="list-progress-item list-progress-item-ok" key={item.check_status}>
+            <span className="list-progress-item-title list-progress-item-title-ok" dangerouslySetInnerHTML={{__html: item.title}}></span>
             <span className="list-progress-item-txt list-progress-item-txt-ok">{item.date} {item.text}</span>
           </li>;
         }else{
@@ -90,27 +131,51 @@ class ReportProgress extends PureComponent {
         }
       });
     }else{
+      console.log('aaaa');
       progressList = list.map(( item, index )=>{
         if(item.check_status <= current_status && current_status < 7){
-          return <li className="list-progress-item list-progress-item-ok" key={item.check_status}>
-            <span className="list-progress-item-title list-progress-item-title-ok">{item.title}</span>
-            <span className="list-progress-item-txt list-progress-item-txt-ok">{item.date} {item.text}</span>
-          </li>;
-        }else if(current_status+1 === item.check_status && current_status < 7){
-          return <li className="list-progress-item" key={item.check_status}>
-            <span className="list-progress-item-title">{item.title}</span>
-            <span className="list-progress-item-txt">{item.date} {item.text}</span>
-          </li>;
+          if(item.check_status === 5 && current_status >= 5){
+            return <li className="list-progress-item list-progress-item-ok" key={item.check_status}>
+              <span className="list-progress-item-title list-progress-item-title-ok" style={{paddingTop:'0.43rem',lineHeight:'0.4rem'}} dangerouslySetInnerHTML={{__html: item.title}}></span>
+              <span className="list-progress-item-txt list-progress-item-txt-ok" style={{paddingTop:'0.45rem',lineHeight:'0.4rem'}}>{item.date} {item.text}</span>
+            </li>;
+          }else if(item.check_status === 5){
+            return <li className="list-progress-item" key={item.check_status}>
+              <span className="list-progress-item-title" style={{paddingTop:'0.43rem',lineHeight:'0.4rem'}} dangerouslySetInnerHTML={{__html: item.title}}></span>
+              <span className="list-progress-item-txt" style={{paddingTop:'0.45rem',lineHeight:'0.4rem'}}>{item.date} {item.text}</span>
+            </li>;
+          }else{
+            return <li className="list-progress-item list-progress-item-ok" key={item.check_status}>
+              <span className="list-progress-item-title list-progress-item-title-ok" dangerouslySetInnerHTML={{__html: item.title}}></span>
+              <span className="list-progress-item-txt list-progress-item-txt-ok">{item.date} {item.text}</span>
+            </li>;
+          }
+        }else{
+          if(item.check_status === 5){
+            return <li className="list-progress-item" key={item.check_status}>
+              <span className="list-progress-item-title" style={{paddingTop:'0.43rem',lineHeight:'0.4rem'}} dangerouslySetInnerHTML={{__html: item.title}}></span>
+            </li>;
+          }else{
+            return <li className="list-progress-item" key={item.check_status}>
+              <span className="list-progress-item-title" dangerouslySetInnerHTML={{__html: item.title}}></span>
+            </li>;
+          }
         }
       });
     }
+
+    const header =  this.state.headerStatus ? this.state.userTitle : <NavBar
+      mode="dark"
+      icon={<Icon type="left" />}
+      onLeftClick={() => window.history.go(-1)}
+      className={'animated fadeIn'}
+    >
+      {this.state.userTitle}
+    </NavBar>;
+
     return (
       <div className="report report-progress" style={{minHeight : document.documentElement.clientHeight}}>
-        <NavBar
-          mode="dark"
-          icon={<Icon type="left" />}
-          onLeftClick={() => window.history.go(-1)}
-        >我的报告</NavBar>
+        <div className="header">{header}</div>
         <div className="report-header">
           <div className="report-header-p1">
             <h2>打开小基因，发现大不同</h2>

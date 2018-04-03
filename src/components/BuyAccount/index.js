@@ -33,6 +33,7 @@ class BuyAccount extends PureComponent {
       total,
       item,
     } = this.props.total;
+    const { discountAmount } = this.props
     return (
       <div className="buy-account">
         <ul className="buy-account-list">
@@ -42,23 +43,11 @@ class BuyAccount extends PureComponent {
           </li>
           <li className="buy-account-item">
             <span className="buy-account-item-label">运费</span>
-            <span className="buy-account-item-value">小基因包邮往返运费</span>
+            <span className="buy-account-item-value">小基因包往返邮费</span>
           </li>
           <li className="buy-account-item">
-            <span className="buy-account-item-label"><span className="b-a-i-l-label">限时优惠</span><Popover
-              overlayClassName="fortest"
-              visible={false}
-              overlay={[
-                (<div className="popover-div">哈哈哈哈哈哈哈哈哈哈哈哈哈</div>)
-              ]}
-              align={{
-                overflow: { adjustY: 0, adjustX: 1 },
-                offset: [13, 10],
-              }}
-            >
-              <span className="icon icon-wenhao"></span>
-            </Popover></span>
-            <span className="buy-account-item-value">-40元</span>
+            <span className="buy-account-item-label"><span className="b-a-i-l-label">优惠</span></span>
+            <span className="buy-account-item-value">{discountAmount}元</span>
           </li>
         </ul>
         <dl className="buy-account-money">

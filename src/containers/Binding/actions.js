@@ -1,7 +1,8 @@
 import {
   BINDING,
   UNBIND_LIST,
-  GET_SIGN_PACKAGE
+  GET_SIGN_PACKAGE,
+  SELF_BINDED,
 } from './constants';
 
 export function binding(params) {
@@ -9,6 +10,19 @@ export function binding(params) {
     type: BINDING,
     payload: {
       promise: fetch().binding(params)
+        .then(res => res.body)
+        .catch(err => {
+          throw err;
+        }),
+    },
+  });
+}
+
+export function selfBinded(params) {
+  return ({ fetch }) => ({
+    type: SELF_BINDED,
+    payload: {
+      promise: fetch().selfBinded(params)
         .then(res => res.body)
         .catch(err => {
           throw err;

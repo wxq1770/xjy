@@ -2,12 +2,10 @@ import { connect } from 'react-redux';
 import { translate } from 'react-i18next';
 import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
-import { NavBar, Icon,Popover } from 'antd-mobile';
+import { NavBar, Icon, Popover, Toast } from 'antd-mobile';
 import { createForm } from 'rc-form';
-import domtoimage from 'dom-to-image';
+import $ from 'jquery';
 import html2canvas from 'html2canvas';
-import TabBarItem from '../../../components/TabBarItem';
-import BuyAccount from '../../../components/BuyAccount';
 
 import toJS from '../../../libs/toJS';
 
@@ -45,6 +43,7 @@ class ReportDetail extends PureComponent {
       item_status: 1,
       tab: 'professional',
       shareStatus: false,
+      showImgStatus: false,
       visible: false,
       caseList: [],
       imageText: {
@@ -69,7 +68,7 @@ class ReportDetail extends PureComponent {
       const { value: { status, msg, data }} = await actions.isLogin({
         body: {},
       });
-      if(data.is_login !== 1){
+      if(status === 1 && data.is_login !== 1){
         this.setState({
           show: 'demo',
           is_login: false,
@@ -106,6 +105,7 @@ class ReportDetail extends PureComponent {
           goods_id: this.state.goods_id,
         },
       });
+
       this.setState({
         show: 'list',
         caseTitle: data.list[0].item_name,
@@ -130,10 +130,11 @@ class ReportDetail extends PureComponent {
       const { value: { status, msg, data }} = await actions.professional({
         body: {
           goods_id: goods_id,
-          item_id : item_id,
-          bind_id: 9,
+          item_id: item_id,
+          bind_id: bind_id,
         },
       });
+      console.log(data);
       this.setState({
         submitting:true,
         item_status: data.item_status === 1 ? 1 : 2,
@@ -151,8 +152,8 @@ class ReportDetail extends PureComponent {
         body: {
           goods_id: goods_id,
           //inspector_id: inspector_id,
-          item_id : item_id,
-          bind_id: 9,
+          item_id: item_id,
+          bind_id: bind_id,
         },
       });
       this.setState({
@@ -175,54 +176,66 @@ class ReportDetail extends PureComponent {
       this.imageText(goods_id, inspector_id, item_id, bind_id);
     }
   }
-  savePng = async () => {
-    const { actions } = this.props;
+  savePng = () => {
     this.setState({
-      shareStatus : true,
+      shareStatus: true,
     });
-    var node = this.refs.ShareImg;
-    domtoimage.toPng(node)
-    .then((dataUrl) =>{
-        var img = new Image();
-        img.src = dataUrl;
-        img.style.width = '90%';
-        img.style.display = 'block';
-        img.style.margin = '0 auto';
-        document.body.appendChild(img);
-        this.setState({
-          shareStatus : false,
-        });
+    $(".report-detail-content").css({
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      zIndex: 1,
+      margin: 0,
+      background: '#2ABEC4',
+      paddingBottom: "0",
+    });
+    window.scrollTo(0,0);
+    let w = $(".report-detail-content").width();
+    let h = $(".report-detail-content").height();
+    let canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+    let context = canvas.getContext("2d");
+    context.scale(2, 2);
+    Toast.loading('生成中...', 1, () => {
+      html2canvas($(".report-detail-content")[0], {
+        canvas: canvas,
+      }).then((canvas) => {
+        $(".report-detail-content").removeAttr('style');
+        try {
+          this.setState({
+            shareStatus: false,
+            showImgStatus: true,
+          });
+          let imgUrl = canvas.toDataURL("image/png");
+          setTimeout(()=>{
+            this.refs.shareImg.innerHTML = '<img src=' + imgUrl + ' />';
+          },1000);
+        } catch (err) {
+          this.setState({
+            shareStatus: false,
+            showImgStatus: false,
+          });
+        }
+      }).catch(function onRejected(error) {});
+    });
+  }
+  closeImg=()=>{
+    this.setState({
+      showImgStatus : false,
     })
-    .catch((error) => {
-        html2canvas(node, {
-            useCORS: true,
-        }).then((canvas)=> {
-          try {
-            var img = new Image();
-            img.src = canvas.toDataURL("image/png");
-            img.style.width = '90%';
-            img.style.display = 'block';
-            img.style.margin = '0 auto';
-            document.body.appendChild(img);
-            this.setState({
-              shareStatus : false,
-            });
-          } catch (err) {
-             this.setState({
-                shareStatus : false,
-             });
-          }
-        }).catch(function onRejected(error) {});
-    });
   }
-  buy = ()=>{
-    const { goods_id } = this.state;
-    if(goods_id){
-      this.props.router.push('/buy/null/'+goods_id);
-    }else{
-      this.props.router.push('/buy/');
-    }
-  }
+  // buy = ()=>{
+  //   const { goods_id } = this.state;
+  //   if(goods_id){
+  //     this.props.router.push('/buy/null/'+goods_id);
+  //   }else{
+  //     this.props.router.push('/buy/');
+  //   }
+  // }
   onSelect = (opt) => {
     const {goods_id, inspector_id, item_id, bind_id ,caseList , tab } = this.state;
     let num = 0;
@@ -271,6 +284,7 @@ class ReportDetail extends PureComponent {
     }else if(tab === 'imageText'){
       this.imageText(goods_id, inspector_id, caseList[num].item_id, bind_id)
     }
+    window.scrollTo(0,0);
   }
   handleVisibleChange = (visible) => {
     this.setState({
@@ -278,7 +292,7 @@ class ReportDetail extends PureComponent {
     });
   }
   render() {
-    const { tab, shareStatus, caseList, visible, caseTitle, nextTitle, professional, imageText, submitting, item_status, height} = this.state;
+    const { tab, shareStatus, showImgStatus, caseList, visible, caseTitle, nextTitle, professional, imageText, submitting, item_status, height} = this.state;
     const caseListArray = [];
     caseList.map( ( item, index) => {
       caseListArray.push((<Item key={index} name={item.item_name} value={item.item_id}>{item.item_name}</Item>))
@@ -294,17 +308,23 @@ class ReportDetail extends PureComponent {
     });
 
     const professionalList = professional.list.map((item,index)=>{
-      return <li className="r-d-s-t-tr" key={index}>
+      return <li className={"r-d-s-t-tr "+(item.result && item.result.length > 7 ? 'r-d-s-t-tr-1' : '')} key={index}>
         <span style={{width:'15%'}}>{item.chromosome}</span>
-        <span style={{width:'15%'}}>{item.gene_name}</span>
+        <span style={{width:'20%'}}>{item.gene_name}</span>
         <span style={{width:'20%'}}>{item.locus}</span>
-        <span style={{width:'15%'}}>{item.gene_type}</span>
-        <span style={{width:'35%'}}>{item.result}</span>
+        <span style={{width:'18%'}}>{item.gene_type}</span>
+        <span style={{width:'27%'}} className={'r-d-s-t-tr-1-span'}>{item.result}</span>
       </li>;
     });
     
     return (
       <div className="report-detail">
+        <div className="share-img" style={{ display: (showImgStatus ? 'block' : 'none')}}>
+          <div className="share-img-bj"></div>
+          <div className="share-img-url" ref="shareImg"></div>
+          <div className="share-img-txt">长按保存图片到相册，可发送朋友或分享朋友圈</div>
+          <Icon type="cross" onClick={this.closeImg} />
+        </div>
         <div ref='navBar'>
           <NavBar
             mode="dark"
@@ -327,7 +347,7 @@ class ReportDetail extends PureComponent {
             </Popover>
           </NavBar>
           <div className="report-detail-tab" ref='tab'>
-            <span className={tab === 'professional' ? 'cur' : ''} onClick={this.tab.bind(this,'professional')}>专业解读版本</span>
+            <span className={tab === 'professional' ? 'cur' : ''} onClick={this.tab.bind(this,'professional')}>专业解读版</span>
             <span className={tab === 'imageText' ? 'cur' : ''} onClick={this.tab.bind(this,'imageText')}>图文分享版</span>
           </div>
         </div>
@@ -351,8 +371,8 @@ class ReportDetail extends PureComponent {
             <span onClick={this.savePng}>生成图片分享</span>
             <span onClick={this.next}>下一项：{nextTitle}</span>
           </div>
-          <div className="footer">
-            <p>【原价99元，限时优惠只需59元】</p>
+          <div className="footer" style={{display:'none'}}>
+            <p>【原价99元，首发优惠只需59元】</p>
             <span onClick={this.buy}>立即购买</span>
           </div>
         </div>
@@ -368,10 +388,10 @@ class ReportDetail extends PureComponent {
               <ul className="report-detail-show-table" style={{display:(submitting ? 'block' : 'none')}}>
                 <li className="r-d-s-t-header">
                   <span style={{width:'15%'}}>染色体</span>
-                  <span style={{width:'15%'}}>基因</span>
+                  <span style={{width:'20%'}}>基因</span>
                   <span style={{width:'20%'}}>位点</span>
-                  <span style={{width:'15%'}}>基因型</span>
-                  <span style={{width:'35%'}}>结果</span>
+                  <span style={{width:'18%'}}>基因型</span>
+                  <span style={{width:'27%'}}>结果</span>
                 </li>
                 {professionalList}
               </ul>
@@ -382,33 +402,27 @@ class ReportDetail extends PureComponent {
               <span className="r-d-p-w-t-icon r-d-p-w-t-icon-2"></span>
               <span className="r-d-p-w-t-txt">解密基因型</span>
             </div>
-            <div className="report-detail-professional-warp-content">
-              <p>{professional.decode_gene}</p>
-            </div>
+            <div className="report-detail-professional-warp-content" dangerouslySetInnerHTML={{__html: professional.decode_gene}}></div>
           </div>
           <div className="report-detail-professional-warp">
             <div className="report-detail-professional-warp-title">
               <span className="r-d-p-w-t-icon r-d-p-w-t-icon-3"></span>
               <span className="r-d-p-w-t-txt">小基因建议</span>
             </div>
-            <div className="report-detail-professional-warp-content">
-              <p>{professional.suggest}</p>
-            </div>
+            <div className="report-detail-professional-warp-content" dangerouslySetInnerHTML={{__html: professional.suggest}}></div>
           </div>
           <div className="report-detail-professional-warp">
             <div className="report-detail-professional-warp-title">
               <span className="r-d-p-w-t-icon r-d-p-w-t-icon-4"></span>
               <span className="r-d-p-w-t-txt">你知道吗?</span>
             </div>
-            <div className="report-detail-professional-warp-content">
-              <p>{professional.knowledge}</p>
-            </div>
+            <div className="report-detail-professional-warp-content" dangerouslySetInnerHTML={{__html: professional.knowledge}}></div>
           </div>
           <div className="report-detail-share">
             <span style={{width:'5.4rem'}} onClick={this.next}>下一项：{nextTitle}</span>
           </div>
-          <div className="footer">
-            <p>【原价99元，限时优惠只需59元】</p>
+          <div className="footer" style={{display:'none'}}>
+            <p>【原价99元，首发优惠只需59元】</p>
             <span onClick={this.buy}>立即购买</span>
           </div>
         </div>

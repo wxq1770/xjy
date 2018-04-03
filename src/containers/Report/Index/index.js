@@ -55,11 +55,6 @@ class ReportIndex extends PureComponent {
             <span className="icon-item-txt">神奇小体验(示例)</span>
             <Icon type="right" />
           </li>
-          <li className="list-product-item list-product-item-1" onClick={this.goDetail}>
-            <span className="icon-item-icon-2"></span>
-            <span className="icon-item-txt">我们的习惯(示例)</span>
-            <Icon type="right" />
-          </li>
         </ul>
         <dl className="footer">
           <dt>关于检测结果的说明</dt>

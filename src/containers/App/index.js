@@ -7,8 +7,8 @@ import cookie from 'react-cookie';
 import React, { PureComponent } from 'react';
 import TabBarItem from '../../components/TabBarItem';
 import toJS from '../../libs/toJS';
-
 import './index.less';
+import './animate.css';
 
 class App extends PureComponent {
 
@@ -28,18 +28,11 @@ class App extends PureComponent {
       localStorage.setItem('locale', locale);
     }
 
-    const userAgent = window.navigator.userAgent.toUpperCase();
-    const pathname = this.props.location.pathname+this.props.location.search;
-    const url = encodeURIComponent("http://www.minigene.net/#"+(pathname));
-    if (userAgent.indexOf("MICROMESSENGER") != -1 && !cookie.load('openid')) {
-      window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx4eed462fe65d3bdb&redirect_uri='+encodeURIComponent("http://www.minigene.net/api/mobile/weixin/getOauth")+'&response_type=code&scope=snsapi_userinfo&state='+url+'#wechat_redirect';
-    }
-
     this.state = {
       locale,
       height: 0,
       pathname: props.location.pathname,
-      nav: ['/index','/buy','/report/list','/user'],
+      nav: ['/index','/buy','/report/list','/user/index'],
     };
   }
 
@@ -50,8 +43,48 @@ class App extends PureComponent {
     this.setState({
       height: (this.refs.tabBarTmp ? parseInt(this.refs.tabBarTmp.offsetHeight) : 0),
     });
+    // 防止内容区域滚到底后引起页面整体的滚动
+    var content = this.refs.App;
+    var startY;
+
+    content.addEventListener('touchstart', function (e) {
+        startY = e.touches[0].clientY;
+    });
+
+    content.addEventListener('touchmove', function (e) {
+        // 高位表示向上滚动
+        // 底位表示向下滚动
+        // 1容许 0禁止
+        var status = '11';
+        var ele = this;
+
+        var currentY = e.touches[0].clientY;
+
+        if (ele.scrollTop === 0) {
+            // 如果内容小于容器则同时禁止上下滚动
+            status = ele.offsetHeight >= ele.scrollHeight ? '00' : '01';
+        } else if (ele.scrollTop + ele.offsetHeight >= ele.scrollHeight) {
+            // 已经滚到底部了只能向上滚动
+            status = '10';
+        }
+
+        if (status != '11') {
+            // 判断当前的滚动方向
+            var direction = currentY - startY > 0 ? '10' : '01';
+            // 操作方向和当前允许状态求与运算，运算结果为0，就说明不允许该方向滚动，则禁止默认事件，阻止滚动
+            if (!(parseInt(status, 2) & parseInt(direction, 2))) {
+                //stopEvent(e);
+            }
+        }
+    });
   }
   componentDidUpdate(){
+    const userAgent = window.navigator.userAgent.toUpperCase();
+    const pathname = this.props.location.pathname+this.props.location.search;
+    const url = encodeURIComponent("http://www.minigene.net/#"+(pathname));
+    if (userAgent.indexOf("MICROMESSENGER") != -1 && !cookie.load('openid')) {
+      window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx4eed462fe65d3bdb&redirect_uri='+encodeURIComponent("http://www.minigene.net/api/mobile/weixin/getOauth")+'&response_type=code&scope=snsapi_userinfo&state='+url+'#wechat_redirect';
+    }
     this.setState({
       height: (this.refs.tabBarTmp ? parseInt(this.refs.tabBarTmp.offsetHeight) : 0),
     });
@@ -73,14 +106,14 @@ class App extends PureComponent {
 
     const height = navState ? this.state.height : 0;
 
-    const content = navState ? <div className="overflow-scrolling fixed buy-warp" style={{overflowX: 'scroll',height: document.documentElement.clientHeight - height}}>
+    const content = navState ? <div className="main overflow-scrolling buy-warp" style={{height: document.documentElement.clientHeight - height}}>
       {this.props.children}
     </div> : this.props.children;
-    const navTmp = navState ? <div ref="tabBarTmp" className="fixed tabBarTmp-warp" >
+    const navTmp = navState ? <div ref="tabBarTmp" className="tabBarTmp-warp" >
       <TabBarItem page={pathname} render={this.renderContent}  />
     </div> : '';
     return (
-      <div className="App" style={{minHeight : document.documentElement.clientHeight}}>
+      <div className="App" ref='App' style={{height : document.documentElement.clientHeight}}>
         {content}
         {navTmp}
       </div>

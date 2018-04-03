@@ -1,6 +1,7 @@
 import {
   ADD_ORDER,
   PAY_PARAMER,
+  GET_OPEN_REGION,
 } from './constants';
 
 export function addOrder(params) {
@@ -8,6 +9,19 @@ export function addOrder(params) {
     type: ADD_ORDER,
     payload: {
       promise: fetch().addOrder(params)
+        .then(res => res.body)
+        .catch(err => {
+          throw err;
+        }),
+    },
+  });
+}
+
+export function getOpenRegion(params) {
+  return ({ fetch }) => ({
+    type: GET_OPEN_REGION,
+    payload: {
+      promise: fetch().getOpenRegion(params)
         .then(res => res.body)
         .catch(err => {
           throw err;

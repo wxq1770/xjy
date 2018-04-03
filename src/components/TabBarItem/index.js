@@ -66,8 +66,8 @@ class TabBarItem extends PureComponent {
           selectedIcon={
             <div className="wode" />
           }
-          selected={this.props.page === '/user'}
-          onPress={this.renderContent.bind(this)}
+          selected={this.props.page === '/user/index'}
+          onPress={this.renderContent.bind(this,'/user/index')}
         >
         </TabBar.Item>
       </TabBar>

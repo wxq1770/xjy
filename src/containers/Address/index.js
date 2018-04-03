@@ -11,6 +11,7 @@ import {
   addressReducer,
   clearStore,
   getPayParamer,
+  getOpenRegion,
 } from './actions';
 
 import {
@@ -73,17 +74,38 @@ class Address extends PureComponent {
       modal: false,
       link: '',
       order_id: '',
+      districtArr:[],
+      discount_amount:0,
+      formStatus:true,
     };
   }
 
-  componentDidMount() {
+  componentDidMount = async () => {
+    const { actions } = this.props;
+
     if (this.props.buyReducer.length === 0) {
        window.history.go(-1);
+       return false;
     }
     if (navigator.platform.indexOf('Win') > -1) {
       document.body.classList.add('windows');
     }
+    let discount_amount = 0;
 
+    this.props.buyReducer.map(key=>{
+      key.product.map(item=>{
+        if(item.checked){
+          discount_amount = parseFloat(discount_amount) + parseFloat(item.discount_amount);
+        }
+        return item;
+      });
+      return key;
+    });
+
+    const  { value: {status, msg, data }} = await actions.getOpenRegion({
+      body: {},
+    });
+    
     this.setState({
       tab: this.props.tab,
       invoice_person: this.props.invoice_person,
@@ -94,12 +116,14 @@ class Address extends PureComponent {
       address: this.props.address,
       district: this.props.district,
       buyReducer: this.props.buyReducer,
+      districtArr: data.list,
       historyPerson: this.props.buyReducer.filter(item => {
         if (item.bind_id === '') {
           return false;
         }
         return true;
       }),
+      discount_amount: discount_amount,
     });
   }
   submit = async () => {
@@ -107,6 +131,7 @@ class Address extends PureComponent {
     const { getFieldError } = this.props.form;
     let status = false;
     let value = [];
+    
     try {
       this.props.form.validateFields((error, item) => {
         if (error && error.district) {
@@ -117,7 +142,14 @@ class Address extends PureComponent {
           value = item;
         }
       });
-      if (status) {
+      
+      if(status){
+        if(!this.state.formStatus){
+          return false;
+        }
+        this.setState({
+          formStatus: false,
+        });
         const list = this.props.buyReducer.map(item => {
           return {
             remark: item.real_name,
@@ -154,22 +186,25 @@ class Address extends PureComponent {
         if (status === 1009) {
           Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
         } else if (status === 1 && this.state.historyPerson.length === this.props.buyReducer.length) {
-          this.setState({ 
-            link: '/result/address/historyperson',
+          this.setState({
+            link: '/result/address/historyperson/'+data.order_id,
             order_id: data.order_id,
           });
-          this.onPress('/result/address/historyperson', data.order_id);
+          this.onPress('/result/address/historyperson/'+data.order_id, data.order_id);
         } else if (status === 1) {
-          this.setState({ 
+          this.setState({
             modal: true,
-            link: '/result/address/succeed',
+            link: '/result/address/succeed/'+data.order_id,
             order_id: data.order_id,
           });
-          this.onPress('/result/address/succeed', data.order_id);
+          this.onPress('/result/address/succeed/'+data.order_id, data.order_id);
         } else if (status !== 1) {
           this.props.router.push('/result/address/fail');
         } else {
           Toast.info(msg, 2);
+          this.setState({
+            formStatus: true,
+          });
         }
       }
     } catch (error) {
@@ -207,16 +242,19 @@ class Address extends PureComponent {
         Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
       }if(status === 1) {
         window.WeixinJSBridge.invoke(
-          'getBrandWCPayRequest', data
+          'getBrandWCPayRequest', data.param
           , (res) => {
             // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
             if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
-              Toast.info('购买成功', 2, () => { this.props.router.push(url); });
-              this.details();
               actions.clearStore();
               actions.clearStoreBuy();
+              this.props.router.push(url);
             }else if( res.err_msg == "get_brand_wcpay_request:fail" ) {
-              Toast.info('支付失败', 3, () => this.props.router.push('/result/address/fail'));
+              this.props.router.push('/result/address/fail');
+            }else if( res.err_msg == "get_brand_wcpay_request:cancel" ) {
+              actions.clearStore();
+              actions.clearStoreBuy();
+              this.props.router.push('/user/order/details/'+order_id)
             }
             this.setState({
               modal: false,
@@ -225,6 +263,9 @@ class Address extends PureComponent {
         );
       }else{
         Toast.info(msg);
+        this.setState({
+          formStatus: true,
+        });
       }
     } catch (error) {
       // 处理登录错误
@@ -235,6 +276,7 @@ class Address extends PureComponent {
     const { getFieldProps, getFieldError } = this.props.form;
     const total = this.props.total;
     const tabValue = this.state.tab;
+    const discount_amount = this.state.discount_amount;
     const historyPersonName = this.state.historyPerson.map(item => item.real_name);
     const tab = tabValue === 1 ?
       <div>
@@ -330,9 +372,9 @@ class Address extends PureComponent {
               onErrorClick={()=>{Toast.info(getFieldError('mobile'),2)}}
               placeholder="手机号码"
             >手机号码</InputItem>
-            <Picker extra="请选择(可选)"
-              data={array}
-              title="地址"
+            <Picker extra="请选择（暂时仅限北京）"
+              data={this.state.districtArr}
+              title="所在地区"
               {...getFieldProps('district',
                 {
                   rules: [{ required: true, message: '请选择所在地区' }],
@@ -358,7 +400,7 @@ class Address extends PureComponent {
               onErrorClick={()=>{Toast.info(getFieldError('address'),2)}}
               clear
               placeholder="详细地址"
-            >详情地址</InputItem>
+            >详细地址</InputItem>
           </List>
         </div>
         :
@@ -378,12 +420,14 @@ class Address extends PureComponent {
           icon={<Icon type="left" />}
           onLeftClick={() => window.history.go(-1)}
         >购买</NavBar>
-        <NoticeBar mode="closable" style={{display:(historyPersonName.length > 0 ? 'block' : 'none')}} icon={null}>您好，{historyPersonName.join('、')}已有样本无需邮寄</NoticeBar>
+        <NoticeBar style={{display:(historyPersonName.length > 0 ? 'flex' : 'none')}} marqueeProps={{ loop: true, style: { padding: '0 7.5px' } }}>
+          您好，历史检测人<span style={{color:'#2ABEC4'}}>{historyPersonName.join('、')}</span>无需重复采样
+        </NoticeBar>
         {addressForm}
         <div className="address-pay">
-          <h4 className="address-pay-title">支付信息</h4>
+          <h4 className="address-pay-title">支付方式</h4>
           <dl className="address-pay-fun">
-            <dt>支付方式</dt>
+            <dt></dt>
             <dd>
               <span className={"icon-weixin cur"}>微信支付</span>
             </dd>
@@ -393,7 +437,7 @@ class Address extends PureComponent {
         <List>
           {tab}
         </List>
-        <BuyAccount total={{total}} submit={this.submit} />
+        <BuyAccount total={{total}} discountAmount={discount_amount} submit={this.submit} />
       </div>
     );
   }
@@ -412,6 +456,7 @@ export default createForm()(translate()(connect(state => ({
   total: state.getIn(['buyReducer', 'total']),
 }), dispatch => ({
   actions: {
+    getOpenRegion: bindActionCreators(getOpenRegion, dispatch),
     addOrder: bindActionCreators(addOrder, dispatch),
     addressReducer: bindActionCreators(addressReducer, dispatch),
     clearStore: bindActionCreators(clearStore, dispatch),

@@ -8,12 +8,16 @@ import TabBarItem from '../../../components/TabBarItem';
 import BuyAccount from '../../../components/BuyAccount';
 import ReportList from '../List';
 import ReportProgress from '../Progress';
-
+import { BeatLoader } from 'react-spinners';
 import toJS from '../../../libs/toJS';
 import {
   goodsProgressList,
   bindUserList,
 } from './actions';
+
+import {
+  orderList,
+} from '../../User/Order/actions';
 
 import {
   isLogin,
@@ -31,7 +35,9 @@ class ReportInit extends PureComponent {
     super(props);
     this.state = {
       show: 'default',
-      bind_id:'',
+      bind_id: '',
+      loadingStatus: true,
+      status: false,
     };
   }
   componentDidMount = async () => {
@@ -40,9 +46,12 @@ class ReportInit extends PureComponent {
       const { value: { status, msg, data }} = await actions.isLogin({
         body: {},
       });
-      if(data.is_login !== 1){
+      console.log(status);
+      if(status !== 1 || data.is_login !== 1){
         this.setState({
           show: 'list',
+          status: true,
+          loadingStatus:false,
         });
       }else{
         try {
@@ -51,21 +60,50 @@ class ReportInit extends PureComponent {
           });
           const bindUserListData = data;
           try {
-            const { value: { status, msg, data }} = await actions.goodsProgressList({
-              body: {
-                inspector_id: bindUserListData.list[0]['inspector_id'],
-              },
+            const { value: {status, msg, data }} = await actions.orderList({
+              body: {},
             });
-            const goodsProgressListData = data;
-            if(goodsProgressListData.list.length === 1 && bindUserListData.list.length === 1 ){
-              this.setState({
-                show: 'progress',
-                bind_id: bindUserListData.list[0]['bind_id'],
-              });
+            if(bindUserListData.list.length === 0){
+              if(status === 1 && data.list.length > 0 && bindUserListData.list.length === 0){
+                this.setState({
+                  show: 'progress',
+                  bind_id: 'demo',
+                  status: true,
+                  loadingStatus:false,
+                });
+              }else{
+                this.setState({
+                  show: 'list',
+                  status: true,
+                  loadingStatus:false,
+                });
+              }
             }else{
-              this.setState({
-                show: 'list',
-              });
+               try {
+                const { value: { status, msg, data }} = await actions.goodsProgressList({
+                  body: {
+                    inspector_id: bindUserListData.list && bindUserListData.list.length > 0 && bindUserListData.list[0]['inspector_id'] ? bindUserListData.list[0]['inspector_id'] : '',
+                  },
+                });
+                const goodsProgressListData = data;
+                if(goodsProgressListData && goodsProgressListData.list.length === 1 && bindUserListData.list.length === 1 && goodsProgressListData.list[0].check_status !== 7){
+                  this.setState({
+                    show: 'progress',
+                    bind_id: goodsProgressListData.list && goodsProgressListData.list[0]['bind_id'] ? goodsProgressListData.list[0]['bind_id'] : '',
+                    status: true,
+                    loadingStatus:false,
+                  });
+                }else{
+                  this.setState({
+                    show: 'list',
+                    status: true,
+                    loadingStatus:false,
+                  });
+                }
+              } catch (error) {
+                // 处理登录错误
+                throw error;
+              }
             }
           } catch (error) {
             // 处理登录错误
@@ -82,9 +120,12 @@ class ReportInit extends PureComponent {
     }
   }
   render() {
-    const content = this.state.show === 'progress' ? <ReportProgress bind_id={this.state.bind_id} /> : <ReportList /> ;
+    const content = this.state.show === 'progress' ? <ReportProgress bind_id={this.state.bind_id} /> :  this.state.show === 'list' ? <ReportList /> : '' ;
     return (
       <div className="report">
+        <div className={'page-loading animated '+(this.state.loadingStatus ? 'fadeInDown' : 'fadeOutDown')}>
+          <BeatLoader color={'#2ABEC4'} loading={true} />
+        </div>
         {content}
       </div>
     );
@@ -97,5 +138,6 @@ export default createForm()(translate()(connect(() => ({
     goodsProgressList: bindActionCreators(goodsProgressList, dispatch),
     bindUserList: bindActionCreators(bindUserList, dispatch),
     isLogin: bindActionCreators(isLogin, dispatch),
+    orderList: bindActionCreators(orderList, dispatch),
   },
 }))(toJS(ReportInit))));

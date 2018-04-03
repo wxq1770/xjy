@@ -44,24 +44,27 @@ class UserOrder extends PureComponent {
       if (this.state.isLoading) {
         const { value: { status, msg, data }} = await actions.orderList({
           body: {
-            page: this.page,
+            page_number: this.page,
             page_size: this.page_size,
           },
         });
-        this.state.list.map(item => {
-          list.push(item);
-          return item;
-        });
-        data.list.map(item => {
-          list.push(item);
-          return item;
-        });
-
-        this.page++;
-        this.page_total = data.page_total;
+        if(status === 1){
+          this.state.list.map(item => {
+            list.push(item);
+            return item;
+          });
+          data.list.map(item => {
+            list.push(item);
+            return item;
+          });
+          this.page_total = data.page_total;
+          if(this.page <= this.page_total){
+            this.page++;
+          }
+        }
         this.setState({
           dataSource: this.state.dataSource.cloneWithRows(list),
-          isLoading: this.page !== this.page_total,
+          isLoading: this.page_total === 0 ? false : this.page <= this.page_total,
           list,
         });
       }
@@ -85,7 +88,7 @@ class UserOrder extends PureComponent {
         Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
       }if(status === 1) {
         window.WeixinJSBridge.invoke(
-          'getBrandWCPayRequest', data
+          'getBrandWCPayRequest', data.param
           , (res) => {
             // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
             if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
@@ -119,7 +122,7 @@ class UserOrder extends PureComponent {
         <div className="product-info" key={rowID} >
           <div className="product-info-header" onClick={() => this.details(rowData)}>
             <span className="product-info-header-left">订单号：{rowData.order_sn}</span>
-            <span className="product-info-header-right"><span>{rowData.status_name}</span><Icon type="right" /></span>
+            <span className="product-info-header-right"><span style={{ color: (rowData.status_name === '已支付' || rowData.status_name === '已发货' ? '#2ABEC4' :  rowData.status_name === '已取消' ? '#333' : '#FF8A00')}}>{rowData.status_name}</span><Icon type="right" /></span>
           </div>
           {
             rowData.gene_list.map((item, i) => {
@@ -148,14 +151,15 @@ class UserOrder extends PureComponent {
         <NavBar
           mode="dark"
           icon={<Icon type="left" />}
-          onLeftClick={() => console.log('onLeftClick')}>
+          onLeftClick={() => window.history.go(-1)}
+        >
           我的订单
         </NavBar>
         <ListView
           ref={el => this.lv = el}
           dataSource={this.state.dataSource}
           renderFooter={() => (<div style={{ textAlign: 'center' }}>
-            {this.state.isLoading ? '正在加载...' : '暂无数据'}
+            {this.state.isLoading  && this.state.dataSource.length > 0 ? '正在加载...' : '暂无数据'}
           </div>)}
           renderRow={row}
           pageSize={this.page_size}

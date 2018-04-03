@@ -14,6 +14,29 @@ body.talkgene.windows {
     font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 }
+.header-popover{
+  width: 4.5rem;
+  display: block;
+  margin: 0 auto;
+}
+.page-loading{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-left: -0.48rem;
+  z-index: 1;
+  height:0.8rem;
+  width: 1.1rem
+}
+.header{
+  font-size: 0.36rem;
+  text-align: center;
+  height: 0.9rem;
+  background-color: #2abec4;
+  color: #fff;
+  line-height: 0.9rem;
+}
+
 .App{
   position:relative;
 }
@@ -29,10 +52,21 @@ body.talkgene.windows {
   width: 100%;
 }
 .tabBarTmp-warp{
-  position: fixed;
+  position: absolute;
   bottom: 0px;
   width: 100%;
 }
+
+.main {
+    /* main绝对定位，进行内部滚动 */
+    position: absolute;
+    overflow-y: scroll;
+    bottom: 0.86rem;
+    width: 100%;
+    left: 0;
+    top: 0px;
+}
+
 
 .am-action-sheet-button-list-item{
   color: #333;
@@ -83,13 +117,14 @@ body.talkgene.windows {
   height: 0.22rem !important;
   width: 0.1rem !important;
 }
+
 .am-modal{
   .am-modal-content{
     overflow:visible;
   }
   .am-modal-close{
     position: absolute;
-    top: 0.15rem;
+    top: 0.82rem;
     right: 0.2rem;
     width: 0.55rem;
     height: 0.55rem;
@@ -112,7 +147,7 @@ body.talkgene.windows {
     width: 1.78rem;
     height: 1.78rem;
     top: -1.0rem;
-    left: 2rem;
+    left: 1.8rem;
     font-size: 0;
   }
   .am-modal-button-group-v .am-modal-button{
@@ -122,6 +157,7 @@ body.talkgene.windows {
   }
   .am-modal-content{
     border-radius: 0.2rem;
+
     .am-modal-body{
       padding-top: 0.45rem;
       font-size: 0.3rem;
@@ -138,4 +174,15 @@ body.talkgene.windows {
 }
 .am-navbar{
   background:#2abec4 !important;
+}
+.popup-1{
+  .am-modal-header{
+    display: none;
+  }
+  .am-modal-close{
+    top: 0.4rem;
+  }
+  .am-modal-close{
+    background: none;
+  }
 }

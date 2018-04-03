@@ -26,7 +26,7 @@ class BindingRecord extends PureComponent{
     this.state = {
       dataSource,
       list: [],
-      isLoading: false,
+      isLoading: true,
     };
   }
   componentDidMount() {
@@ -37,15 +37,16 @@ class BindingRecord extends PureComponent{
   }
   onEndReached = async () => {
     const { actions } = this.props;
-    try {
-      if(this.state.isLoading){
-        const list = [];
-        const { value: { status, msg, data }} = await actions.bindList({
-          body: {
-            page: this.page,
-            page_size: this.page_size,
-          },
-        });
+    if(this.state.isLoading){
+      const list = [];
+      const { value: { status, msg, data }} = await actions.bindList({
+        body: {
+          page_number: this.page,
+          page_size: this.page_size,
+        },
+      });
+
+      if(status === 1){
         this.state.list.map(item => {
           list.push(item);
           return item;
@@ -55,32 +56,32 @@ class BindingRecord extends PureComponent{
           return item;
         });
 
-        this.page++;
         this.page_total = data.page_total;
-        this.setState({
-          dataSource: this.state.dataSource.cloneWithRows(list),
-          isLoading: this.page !== this.page_total,
-          list,
-        });
+        if(this.page <= this.page_total){
+          this.page++;
+        }
       }
-    } catch (error) {
-      // 处理登录错误
-      throw error;
+      this.setState({
+        dataSource: this.state.dataSource.cloneWithRows(list),
+        isLoading: this.page_total === 0 ? false : this.page <= this.page_total,
+        list,
+      });
     }
   }
   onClick = item => {
-    this.props.router.push(`/buy/${item.bind_id}`);
+    this.props.router.push(`/buyproduct/${item.bind_id}`);
   }
   render() {
     const row = (rowData, sectionID, rowID) => {
       return (
         <div className="binding-record-item" key={rowID}>
+          <div className="b-r-i-header" style={{display: (rowData.relation === 1 ? 'block': 'none')}}>本人</div>
           <div className="b-r-i-warp clearfix">
             <span className="b-r-i-warp-left">样本码：{rowData.sample_code}</span>
             <span className="b-r-i-warp-right">检测密码：{rowData.check_code}</span>
           </div>
           <div className="b-r-i-warp clearfix">
-            <span className="b-r-i-warp-left">绑定人：{rowData.real_name}（{rowData.sex === 1 ? '男' : '女'}）<span className="benren">本人</span></span>
+            <span className="b-r-i-warp-left">绑定人：{rowData.real_name}（{rowData.sex === 1 ? '男' : '女'}）</span>
             <span className="b-r-i-warp-right">绑定日期：{rowData.bind_date}</span>
           </div>
           <div className="b-r-i-btn" onClick={() => this.onClick(rowData)}>再次购买</div>

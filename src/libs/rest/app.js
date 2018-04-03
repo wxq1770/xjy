@@ -5,6 +5,41 @@ export default {
     method: 'get',
     url: 'helloword/{{params}}',
   },
+ 
+  selfBinded: {
+    method: 'post',
+    url: 'api/mobile/user/selfBinded',
+  },
+
+  subscribe: {
+    method: 'post',
+    url: 'api/mobile/gene/subscribe',
+  },
+
+  isSubscribe: {
+    method: 'post',
+    url: 'api/mobile/gene/isSubscribe',
+  },
+
+  getUserInfo: {
+    method: 'post',
+    url: 'api/mobile/user/getUserInfo',
+  },
+
+  messageList: {
+    method: 'post',
+    url: 'api/mobile/user/messageList',
+  },
+  
+  getOpenRegion: {
+    method: 'post',
+    url: 'api/home/api/getOpenRegion',
+  },
+
+  messageInfo: {
+    method: 'post',
+    url: 'api/mobile/user/messageInfo',
+  },
 
   saveBase64Img: {
     method: 'post',
@@ -73,7 +108,7 @@ export default {
 
   getPayParamer: {
     method: 'post',
-    url: 'api/mobile/payment/getPayParamer',
+    url: 'api/mobile/payment/getPayParam',
   },
 
   unbindList: {

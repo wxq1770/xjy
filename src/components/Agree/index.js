@@ -13,7 +13,7 @@ class Agree extends PureComponent {
 
   render() {
     return (
-      <div className="agree" style={{ height: `${window.screen.height}px` }}>
+      <div className="agree" >
         <h2>小基因服务协议</h2>
 
         <h3>尊敬的用户：</h3>

@@ -102,15 +102,10 @@ class Order extends PureComponent {
         Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
       }if(status === 1) {
         window.WeixinJSBridge.invoke(
-          'getBrandWCPayRequest', data
+          'getBrandWCPayRequest', data.param
           , (res) => {
-            // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
             if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
-
-              //'/result/address/historyperson'
-              //'/result/address/succeed'
-
-              Toast.info('购买成功', 2, () => { this.props.router.push('/result/address/succeed'); });
+              Toast.info('购买成功', 2, () => { this.props.router.push('/result/address/succeed/'+this.id); });
               this.details();
               actions.clearStore();
               actions.clearStoreBuy();
@@ -148,8 +143,8 @@ class Order extends PureComponent {
           <span>{details.mobile}</span>
         </li>
         <li className="order-warp-li">
-          <span className="o-w-l-name">收货地址：</span>
-          <span>{details.address}</span>
+          <span className="o-w-l-name o-w-l-dizhi">收货地址：</span>
+          <span className="o-w-l-dizhi-value">{details.address}</span>
         </li>
       </ul>
       <ul className="order-warp-ul" style={{ display: details.status_name === '已发货' ? 'block' : 'none' }}>
@@ -160,31 +155,29 @@ class Order extends PureComponent {
         <li className="order-warp-li">
           <span className="o-w-l-name">快递单号：</span>
           <span>{details.shipping_sn}</span>
-          <span className="o-w-l-copy">点击复制</span>
         </li>
       </ul>
     </div>
     : '';
 
-    const noticeBar = gene_list.length > 0 && gene_list_name.length > 0 && gene_list.length === gene_list_name.length ? <NoticeBar mode="closable" icon={null}>实验室已有,{gene_list_name.map((item => item.remark)).join('，')}的DNA样本,不需重复收集</NoticeBar> : '';
+    const noticeBar = gene_list.length > 0 && gene_list_name.length > 0 ? <NoticeBar icon={null}>您好，历史检测人<span style={{color:'#2ABEC4'}}>{gene_list_name.map((item => item.remark)).join('、')}</span>无需重复采样</NoticeBar> : '';
 
     const list = gene_list.map((item, i) => {
       const pwd = item.history_id > 0 ? <div className="product-info-content-right" style={{ height: '1.4rem', paddingTop: '0.18rem' }}>
-          <span className="color-2a">检测人姓名</span>
-          <span className="color-2a-1">{item.remark}</span>
+          <span className="color-2a">历史检测人</span>
+          <span className="color-2a-1">无需新密码</span>
         </div>
         :
-        <div className="product-info-content-right">
+        <div className="product-info-content-right" style={{ height: '1.4rem', paddingTop: '0.18rem' }}>
           <span className="color-2a">检测密码</span>
-          <span className="color-666-1">点击复制</span>
           <span className="color-2a-1">{item.check_code}</span>
         </div>;
 
       return <div className="product-info-content" key={i}>
-        <div className="product-info-content-left" style={{ paddingTop: item.history_id > 0 ? '0.3rem' : '0' }}>
-          <span className="color-666" style={{ display: item.history_id > 0 ? 'none' : 'block' }}>检测人：{item.remark}</span>
-          <span>检测包含：{item.goods_names}</span>
-          <span>￥{item.total_price}元</span>
+        <div className="product-info-content-left" >
+          <span style={{paddingLeft:'0.27rem'}}>检测人：{item.remark}</span>
+          <span>检测产品：{item.goods_names}</span>
+          <span>消费金额：{item.total_price}元</span>
         </div>
         {pwd}
       </div>;
@@ -204,7 +197,7 @@ class Order extends PureComponent {
             <li className="order-warp-li">
               <span className="o-w-l-name">订单号：</span>
               <span>{details.order_sn}</span>
-              <span className="o-w-l-status">{details.status_name}</span>
+              <span className="o-w-l-status" style={{ color: (details.status_name === '已支付' || details.status_name === '已发货' ? '#2ABEC4' :  details.status_name === '已取消' ? '#333' : '#FF8A00')}}>{details.status_name}</span>
             </li>
             <li className="order-warp-li">
               <span className="o-w-l-name">订单日期：</span>
@@ -221,7 +214,7 @@ class Order extends PureComponent {
         </div>
         <div className="footer-btn">
           <div className="footer-btn-money">
-            实付：208元
+            实付：{details.order_amount}元
           </div>
           <div className="footer-btn-right" style={{ display: details.status_name === '待支付' ? 'block' : 'none' }}>
             <span onClick={() => this.cancelOrder(details)}>取消订单</span>

@@ -1,17 +1,14 @@
 import { fromJS } from 'immutable';
-import {
-  HELLO_WORLD_SUCCESS,
-} from './constants';
 
 const initialState = fromJS({
-  helloword: {},
+  focusStatus: false,
 });
 
-export default function appReducer(state = initialState, action) {
+export default function indexReducer(state = initialState, action) {
   switch (action.type) {
-    case HELLO_WORLD_SUCCESS: {
+    case 'focusStatus': {
       const response = action.payload;
-      return state.set('helloword', fromJS(response || {}));
+      return state.set('focusStatus', fromJS(response || {}));
     }
   }
   return state;

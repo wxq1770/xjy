@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { translate } from 'react-i18next';
 import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
-import { Checkbox, Toast, Modal } from 'antd-mobile';
+import { Toast, Modal } from 'antd-mobile';
 import { createForm } from 'rc-form';
 
 import toJS from '../../libs/toJS';
@@ -15,8 +15,6 @@ import {
 } from './actions';
 
 import './index.less';
-
-const AgreeItem = Checkbox.AgreeItem;
 
 class Register extends PureComponent {
 
@@ -36,7 +34,6 @@ class Register extends PureComponent {
       sendTxt: '获取验证码',
       sendStatus: true,
       sendSecond: 60,
-      protocolChecked: true,
       agree: true,
       agreeError: '',
       inviter: '',
@@ -65,13 +62,13 @@ class Register extends PureComponent {
             mobile: phone,
           },
         });
-        if (status !== 0) {
+        if (status === 0) {
           this.setState({
-            phoneError: msg,
+            phoneError: '',
           });
         }else{
           this.setState({
-            phoneError: '',
+            phoneError: msg,
           });
         }
       } catch (error) {
@@ -80,8 +77,6 @@ class Register extends PureComponent {
         });
         throw error;
       }
-    }else{
-      this.setState({ phone, phoneError: '请输入正确的手机号' });
     }
   }
 
@@ -94,8 +89,20 @@ class Register extends PureComponent {
 
   sendCode = async () => {
     const { actions } = this.props;
-    const { phone, phoneError, sendStatus,verify_code } = this.state;
+    let { phone, phoneError, sendStatus,verify_code } = this.state;
     let data = {};
+    if (!(phone.length === 11 &&
+      phone[0] === '1' &&
+      phone.indexOf(' ') === -1 &&
+      /^[0-9]+$/.test(phone))) {
+      this.setState({phoneError: '请输入正确的手机号' });
+      return false;
+    }else{
+      phoneError = '';
+      this.setState({
+        phoneError: '',
+      });
+    }
     if (phone && !phoneError && sendStatus) {
       try {
         this.setState({
@@ -122,8 +129,8 @@ class Register extends PureComponent {
               this.setState({
                 sendSecond: 60,
                 sendTxt: '获取验证码',
-                sendStatus: false,
-                verify_code : ''
+                sendStatus: true,
+                verify_code : '',
               });
             } else {
               count--;
@@ -194,10 +201,17 @@ class Register extends PureComponent {
           router.replace('/');
         } else {
           Toast.fail(msg, 2);
-          this.setState({
-            phoneError: msg,
-            submitting: false,
-          });
+          if ( msg.indexOf('验证码') > -1 ) {
+            this.setState({
+              captchaError: msg,
+              submitting: false,
+            });
+          }else{
+            this.setState({
+              phoneError: msg,
+              submitting: false,
+            });
+          }
         }
       } catch (error) {
         // 处理登录错误
@@ -269,11 +283,11 @@ class Register extends PureComponent {
     this.setState({ inviter: e.target.value });
   }
 
-  onChangeAgree = e => {
+  onChangeAgree = () => {
+    const agree = this.state.agree;
     this.setState({
-      agree: e.target.checked,
-      agreeError: e.target.checked ? '' :
-        '请选择小基因服务协议',
+      agree: !agree,
+      agreeError: !agree ? '' : '请选择小基因服务协议',
     });
   }
 
@@ -292,14 +306,15 @@ class Register extends PureComponent {
       captchaError,
       sendTxt,
       sendStatus,
-      protocolChecked,
       agreeError,
+      agree,
     } = this.state;
 
     return (
       <div className="register" style={{
         height: `${window.screen.height}px`,
       }}>
+        <div className="login-header"></div>
         <Modal
           visible={this.state.modal}
           onClose={this.onCloseModal}
@@ -312,7 +327,7 @@ class Register extends PureComponent {
           }]}
           wrapProps={{ onTouchStart: this.onWrapTouchStart }}>
           <div>
-            <div>发送手机短信超过限制
+            <div>请输入下方图形验证码
               <img
                 className="phone-captcha"
                 onClick={this.onClickVerifyCode}
@@ -356,7 +371,7 @@ class Register extends PureComponent {
             <input
               maxLength="11"
               type="tel"
-              placeholder="请输入邀请人手机号"
+              placeholder="请输入邀请人手机号（选填）"
               onChange={this.onChangeInviter}
               className="form-item-input" />
           </div>
@@ -368,20 +383,21 @@ class Register extends PureComponent {
             disabled={submitting}
             onClick={this.submit}>立即注册</button>
           <div className="form-protocol">
-            <AgreeItem
-              defaultChecked={protocolChecked}
-              onChange={this.onChangeAgree} />
-            <a onClick={this.showAgree}>同意《小基因服务协议》</a>
+            <div className="protocol-warp">
+              <span className={agree ? 'icon-xuanzhong' : 'icon-weixuanzhong'} onClick={this.onChangeAgree}>同意</span>
+              <span onClick={this.showAgree} >《小基因服务协议》</span>
+            </div>
             {agreeError && <span className="form-error">{agreeError}</span>}
           </div>
         </div>
         <Modal
-          popup
           visible={this.state.modal2}
           onClose={this.onCloseAgree}
-          closable={true}
+          transparent
           maskClosable={true}
-          animationType="slide-up">
+          className={'popup-1'}
+          closable={true}
+          title="小基因服务协议">
           <Agree />
         </Modal>
       </div>
