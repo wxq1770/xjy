@@ -2,11 +2,12 @@ import { connect } from 'react-redux';
 import { translate } from 'react-i18next';
 import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
-import { NavBar, Icon } from 'antd-mobile';
+import { NavBar, Icon, Badge } from 'antd-mobile';
 import { createForm } from 'rc-form';
 import toJS from '../../../libs/toJS';
 import {
   getUserInfo,
+  messageUnreadCount,
 } from './actions';
 import './index.less';
 
@@ -22,6 +23,7 @@ class UserIndex extends PureComponent {
       nickname: '',
       head_pic: '',
       state: false,
+      count:0,
     };
   }
   componentDidMount = async () => {
@@ -53,18 +55,33 @@ class UserIndex extends PureComponent {
       throw error;
     }
   }
+  componentDidUpdate = async () => {
+    const { actions } = this.props;
+    try {
+      const { value: { status, msg, data }} = await actions.messageUnreadCount({
+        body: {},
+      });
+      this.setState({
+        count: status === 1 ? data.count : 0,
+      });
+    } catch (error) {
+      // 处理登录错误
+      throw error;
+    }
+  }
   renderContent = page => {
     this.props.router.push(page);
   }
   render() {
-    const {mobile, nickname, head_pic, status, state} = this.state;
+    const {mobile, nickname, head_pic, status, state, count} = this.state;
     const nicknameStr = status === 1 ? nickname ? <span className="user-nickname">{nickname}</span> : <span className="user-nickname">游客</span>  : <span className="user-info-btn"><span onClick={this.renderContent.bind(this,'/register')}>注册</span>/<span onClick={this.renderContent.bind(this,'/login')}>登录</span></span>;
 
     return (
       <div className="user-index">
         <div className="user-header">
           <h2 className="user-title">个人中心</h2>
-          <span className="user-email" onClick={this.renderContent.bind(this,'/user/message')}></span>
+          {(count > 0 ? <span className="user-email" onClick={this.renderContent.bind(this,'/user/message')}><Badge dot></Badge></span> : <span className="user-email" onClick={this.renderContent.bind(this,'/user/message')}></span>)}
+          
           <div className="user-info">
             <span className="user-info-head">
               <img src={ head_pic ? head_pic : "http://www.minigene.net/assets/img/user_touxiang.png" } className="user-info-head-src" />
@@ -118,5 +135,6 @@ export default createForm()(translate()(connect(() => ({
 }), dispatch => ({
   actions: {
     getUserInfo: bindActionCreators(getUserInfo, dispatch),
+    messageUnreadCount: bindActionCreators(messageUnreadCount, dispatch),
   },
 }))(toJS(UserIndex))));

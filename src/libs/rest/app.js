@@ -11,6 +11,16 @@ export default {
     url: 'api/mobile/user/selfBinded',
   },
 
+  getMwebPayParam: {
+    method: 'post',
+    url: 'api/mobile/payment/getMwebPayParam',
+  },
+
+  messageUnreadCount: {
+    method: 'post',
+    url: 'api/mobile/user/messageUnreadCount',
+  },
+
   subscribe: {
     method: 'post',
     url: 'api/mobile/gene/subscribe',

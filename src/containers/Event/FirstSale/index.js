@@ -34,6 +34,7 @@ class FirstSale extends PureComponent {
   }
 
   buy = ()=>{
+    window.scrollTo(0,0);
     this.props.router.push('/buyproduct');
   }
 

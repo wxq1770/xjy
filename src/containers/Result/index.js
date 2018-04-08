@@ -159,7 +159,7 @@ class Result extends PureComponent {
       content = <div>
         <h4>支付失败</h4>
         <p>
-          请重新支付在试试<br/>
+          请重新支付再试试<br/>
           也可呼唤小基因客服哦<br/>
         </p>
         <span className="result-content-btn" onClick={this.back}>重新支付</span>

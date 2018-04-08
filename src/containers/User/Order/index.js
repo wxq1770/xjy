@@ -7,8 +7,11 @@ import { createForm } from 'rc-form';
 import toJS from '../../../libs/toJS';
 import {
   orderList,
-  getPayParamer,
 } from './actions';
+import {
+  getMwebPayParam,
+  getPayParamer,
+} from '../../Address/actions';
 import './index.less';
 
 class UserOrder extends PureComponent {
@@ -78,42 +81,56 @@ class UserOrder extends PureComponent {
   }
   payment = async (rowData) => {
     const { actions } = this.props;
-    try {
-      const { value: { status, msg, data }} = await actions.getPayParamer({
-        body: {
-          order_id: rowData.order_id,
-        },
-      });
-      if (status === 1009) {
-        Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
-      }if(status === 1) {
-        window.WeixinJSBridge.invoke(
-          'getBrandWCPayRequest', data.param
-          , (res) => {
-            // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
-            if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
-
-              //'/result/address/historyperson'
-              //'/result/address/succeed'
-
-              Toast.info('购买成功', 2, () => { this.props.router.push('/result/address/succeed'); });
-              this.details();
-              actions.clearStore();
-              actions.clearStoreBuy();
-            }else if( res.err_msg == "get_brand_wcpay_request:fail" ) {
-              Toast.info('支付失败', 3, () => this.props.router.push('/result/address/fail'));
-            }
-            this.setState({
-              modal: false,
-            });
+    let that = this;
+    const userAgent = window.navigator.userAgent.toUpperCase();
+    if (userAgent.indexOf("MICROMESSENGER") > -1){
+      try {
+        const { value: { status, msg, data }} = await actions.getPayParamer({
+          body: {
+            order_id: rowData.order_id,
           },
-        );
-      }else{
-        Toast.info(msg);
+        });
+        if (status === 1009) {
+          Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
+        }else if(status === 1) {
+          window.WeixinJSBridge.invoke(
+            'getBrandWCPayRequest', data.param
+            , (res) => {
+              if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
+                this.details(rowData);
+              }else if( res.err_msg == "get_brand_wcpay_request:fail" ) {
+                Toast.info('支付失败', 3, () => this.props.router.push('/result/address/fail'));
+              }
+              this.setState({
+                modal: false,
+              });
+            },
+          );
+        }else{
+          Toast.info(msg);
+        }
+      } catch (error) {
+        // 处理登录错误
+        throw error;
       }
-    } catch (error) {
-      // 处理登录错误
-      throw error;
+    }else{
+      try {
+        const { value: { status, msg, data }} = await actions.getMwebPayParam({
+          body: {
+            order_id: rowData.order_id,
+          },
+        });
+        if(status === 1){
+          window.location.href = data.param.mweb_url+'&redirect_url='+encodeURIComponent(data.param.jump_url);
+        }else if (status === 1009) {
+          Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
+        }else{
+          Toast.info(msg, 3);
+        }
+      } catch (error) {
+        // 处理登录错误
+        throw error;
+      }
     }
   }
   render() {
@@ -177,5 +194,6 @@ export default createForm()(translate()(connect(() => ({
   actions: {
     orderList: bindActionCreators(orderList, dispatch),
     getPayParamer: bindActionCreators(getPayParamer, dispatch),
+    getMwebPayParam: bindActionCreators(getMwebPayParam, dispatch),
   },
 }))(toJS(UserOrder))));

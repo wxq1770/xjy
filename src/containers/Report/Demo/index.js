@@ -182,6 +182,53 @@ class ReportDemo extends PureComponent {
     });
   }
   tab = (cur) => {
+    const pathname = this.props.location.pathname+this.props.location.search;
+    const newUrl = "http://www.minigene.net/#"+(pathname);
+    window.wx.onMenuShareTimeline({
+      title: '来自基因的小秘密，你也得看看', 
+      link: newUrl, 
+      imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+      success: function () {},
+      cancel: function () {},
+    });
+
+    window.wx.onMenuShareAppMessage({
+      title: '来自基因的小秘密，你也得看看', 
+      desc: '', 
+      link: newUrl, 
+      imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+      type: 'link', // 分享类型,music、video或link，不填默认为link
+      dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+      success: function () {},
+      cancel: function () {},
+    });
+
+    window.wx.onMenuShareQQ({
+      title: '来自基因的小秘密，你也得看看', 
+      desc: '', 
+      link: newUrl, // 分享链接
+      imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+      success: function () {},
+      cancel: function () {},
+    });
+
+    window.wx.onMenuShareWeibo({
+      title: '来自基因的小秘密，你也得看看', 
+      desc: '', 
+      link: newUrl, // 分享链接
+      imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+      success: function () {},
+      cancel: function () {},
+    });
+
+    window.wx.onMenuShareQZone({
+      title: '来自基因的小秘密，你也得看看', 
+      desc: '', 
+      link: newUrl, // 分享链接
+      imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+      success: function () {},
+      cancel: function () {},
+    });
     this.setState({
       tab : cur,
     });
@@ -202,8 +249,8 @@ class ReportDemo extends PureComponent {
       paddingBottom:"0",
     });
     window.scrollTo(0,0);
-    let w = $(".report-detail-content").width();
-    let h = $(".report-detail-content").height();
+    let w = 320;
+    let h = 600;
     let canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
@@ -235,6 +282,7 @@ class ReportDemo extends PureComponent {
     });
   }
   buy = ()=>{
+    window.scrollTo(0,0);
     this.props.router.push('/buyproduct');
   }
   onSelect = (opt) => {

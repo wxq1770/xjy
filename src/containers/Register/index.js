@@ -150,7 +150,7 @@ class Register extends PureComponent {
           });
           this.verifyCodeRef.focus();
         } else {
-          Toast.info(msg, 1);
+          Toast.info(msg, 2);
         }
       } catch (error) {
         this.setState({

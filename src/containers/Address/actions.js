@@ -2,6 +2,7 @@ import {
   ADD_ORDER,
   PAY_PARAMER,
   GET_OPEN_REGION,
+  WEB_PAY_PARAMER,
 } from './constants';
 
 export function addOrder(params) {
@@ -22,6 +23,19 @@ export function getOpenRegion(params) {
     type: GET_OPEN_REGION,
     payload: {
       promise: fetch().getOpenRegion(params)
+        .then(res => res.body)
+        .catch(err => {
+          throw err;
+        }),
+    },
+  });
+}
+
+export function getMwebPayParam(params) {
+  return ({ fetch }) => ({
+    type: WEB_PAY_PARAMER,
+    payload: {
+      promise: fetch().getMwebPayParam(params)
         .then(res => res.body)
         .catch(err => {
           throw err;

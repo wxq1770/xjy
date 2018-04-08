@@ -37,6 +37,7 @@ class Recommend extends PureComponent {
   }
 
   renderContent = page => {
+    window.scrollTo(0,0);
     this.props.router.push(page);
   }
 

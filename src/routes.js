@@ -15,6 +15,7 @@ import ReportList from './containers/Report/List';
 import ReportIndex from './containers/Report/Index';
 import ReportInit from './containers/Report/Init';
 import ReportDemo from './containers/Report/Demo';
+import ReportShare from './containers/Report/Share';
 import ReportProgress from './containers/Report/Progress';
 import ReportDetail from './containers/Report/Detail';
 import BindingRecord from './containers/BindingRecord';
@@ -98,6 +99,7 @@ export default function createRoutes({ getState, dispatch }) {
         <Route path="address" component={Address} />
         <Route path="event/sale" component={FirstSale} />
         <Route path="report" >
+          <Route path="share(/:bind_id)(/:goods_id)(/:inspector_id)(/:item_id)" component={ReportShare} />
           <Route path="index" component={ReportIndex} />
           <Route path="demo" component={ReportDemo} />
           <Route path="list" component={ReportInit} />

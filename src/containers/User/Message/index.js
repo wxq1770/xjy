@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { translate } from 'react-i18next';
 import { bindActionCreators } from 'redux';
 import React, { PureComponent } from 'react';
-import { NavBar, Icon, ListView } from 'antd-mobile';
+import { NavBar, Icon, ListView, Badge } from 'antd-mobile';
 import { createForm } from 'rc-form';
 import toJS from '../../../libs/toJS';
 import {
@@ -78,6 +78,7 @@ class Message extends PureComponent {
       return (
         <div className="user-message-list-item" key={rowID} onClick={this.renderContent.bind(this,'/user/messagedetail/'+rowData.msg_id)}>
           <div className="u-m-l-i-header">
+            {(rowData.status === 0 ? <Badge dot></Badge> : '')}
             <span className='u-m-l-i-label'>系统</span>
             <span className="u-m-l-i-title">{rowData.title}</span>
             <span className="u-m-l-i-date">{rowData.send_time}</span>

@@ -12,6 +12,7 @@ import {
   clearStore,
   getPayParamer,
   getOpenRegion,
+  getMwebPayParam,
 } from './actions';
 
 import {
@@ -232,44 +233,65 @@ class Address extends PureComponent {
   }
   onPress = async (url, order_id) => {
     const { actions } = this.props;
-    try {
-      const { value: { status, msg, data }} = await actions.getPayParamer({
-        body: {
-          order_id: order_id,
-        },
-      });
-      if (status === 1009) {
-        Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
-      }if(status === 1) {
-        window.WeixinJSBridge.invoke(
-          'getBrandWCPayRequest', data.param
-          , (res) => {
-            // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
-            if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
-              actions.clearStore();
-              actions.clearStoreBuy();
-              this.props.router.push(url);
-            }else if( res.err_msg == "get_brand_wcpay_request:fail" ) {
-              this.props.router.push('/result/address/fail');
-            }else if( res.err_msg == "get_brand_wcpay_request:cancel" ) {
-              actions.clearStore();
-              actions.clearStoreBuy();
-              this.props.router.push('/user/order/details/'+order_id)
-            }
-            this.setState({
-              modal: false,
-            });
+    const userAgent = window.navigator.userAgent.toUpperCase();
+    if (userAgent.indexOf("MICROMESSENGER") > -1){
+      try {
+        const { value: { status, msg, data }} = await actions.getPayParamer({
+          body: {
+            order_id: order_id,
           },
-        );
-      }else{
-        Toast.info(msg);
-        this.setState({
-          formStatus: true,
         });
+        if (status === 1009) {
+          Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
+        }if(status === 1) {
+          window.WeixinJSBridge.invoke(
+            'getBrandWCPayRequest', data.param
+            , (res) => {
+              // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+              if ( res.err_msg == "get_brand_wcpay_request:ok" ) {
+                actions.clearStore();
+                actions.clearStoreBuy();
+                this.props.router.push(url);
+              }else if( res.err_msg == "get_brand_wcpay_request:fail" ) {
+                this.props.router.push('/result/address/fail');
+              }else if( res.err_msg == "get_brand_wcpay_request:cancel" ) {
+                actions.clearStore();
+                actions.clearStoreBuy();
+                this.props.router.push('/user/order/details/'+order_id)
+              }
+              this.setState({
+                modal: false,
+              });
+            },
+          );
+        }else{
+          Toast.info(msg);
+          this.setState({
+            formStatus: true,
+          });
+        }
+      } catch (error) {
+        // 处理登录错误
+        throw error;
       }
-    } catch (error) {
-      // 处理登录错误
-      throw error;
+    }else{
+      try {
+        const { value: { status, msg, data }} = await actions.getMwebPayParam({
+          body: {
+            order_id: order_id,
+          },
+        });
+        if(status === 1){
+          window.location.href = data.param.mweb_url+'&redirect_url='+encodeURIComponent(data.param.jump_url);
+        }else if (status === 1009) {
+          Toast.info('您未登录3秒后自动跳转到登录页面', 3, () => this.props.router.push('/login?target=/address'));
+        }else{
+          Toast.info(msg, 3);
+        }
+      } catch (error) {
+        // 处理登录错误
+        throw error;
+      }
     }
   }
   render() {
@@ -462,5 +484,6 @@ export default createForm()(translate()(connect(state => ({
     clearStore: bindActionCreators(clearStore, dispatch),
     clearStoreBuy: bindActionCreators(clearStoreBuy, dispatch),
     getPayParamer: bindActionCreators(getPayParamer, dispatch),
+    getMwebPayParam: bindActionCreators(getMwebPayParam, dispatch),
   },
 }))(toJS(Address))));

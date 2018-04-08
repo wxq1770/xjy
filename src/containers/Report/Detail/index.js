@@ -37,6 +37,7 @@ class ReportDetail extends PureComponent {
       goods_id: parseInt(this.props.params.goods_id ? this.props.params.goods_id : ''),
       bind_id: parseInt(this.props.params.bind_id ? this.props.params.bind_id : ''),
       is_login: false,
+      shareUrl:'',
       show: '',
       item_id: '',
       caseTitle:'报告',
@@ -134,7 +135,6 @@ class ReportDetail extends PureComponent {
           bind_id: bind_id,
         },
       });
-      console.log(data);
       this.setState({
         submitting:true,
         item_status: data.item_status === 1 ? 1 : 2,
@@ -160,18 +160,116 @@ class ReportDetail extends PureComponent {
         item_status: data.item_status === 1 ? 1 : 2,
         imageText: data,
       });
+      this.share();
     } catch (error) {
       // 处理登录错误
       throw error;
     }
   }
-  tab = (cur) => {
-    this.setState({
-      tab : cur,
-    });
+  share = () =>{
     const {goods_id, inspector_id, item_id, bind_id} = this.state;
+    const shareUrl = "http://www.minigene.net/#/report/share/"+bind_id+"/"+goods_id+"/"+inspector_id+"/"+item_id;
+    window.wx.onMenuShareTimeline({
+        title: '来自基因的小秘密，你也得看看', 
+        link: shareUrl, 
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        success: function () {},
+        cancel: function () {},
+      });
+
+      window.wx.onMenuShareAppMessage({
+        title: '来自基因的小秘密，你也得看看', 
+        desc: '', 
+        link: shareUrl, 
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        type: 'link', // 分享类型,music、video或link，不填默认为link
+        dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+        success: function () {},
+        cancel: function () {},
+      });
+
+      window.wx.onMenuShareQQ({
+        title: '来自基因的小秘密，你也得看看', 
+        desc: '', 
+        link: shareUrl, // 分享链接
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        success: function () {},
+        cancel: function () {},
+      });
+
+      window.wx.onMenuShareWeibo({
+        title: '来自基因的小秘密，你也得看看', 
+        desc: '', 
+        link: shareUrl, // 分享链接
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        success: function () {},
+        cancel: function () {},
+      });
+
+      window.wx.onMenuShareQZone({
+        title: '来自基因的小秘密，你也得看看', 
+        desc: '', 
+        link: shareUrl, // 分享链接
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        success: function () {},
+        cancel: function () {},
+      });
+  }
+  tab = (cur) => {
+    const pathname = this.props.location.pathname+this.props.location.search;
+    const newUrl = "http://www.minigene.net/#/index"+(pathname);
+    const {goods_id, inspector_id, item_id, bind_id} = this.state;
+    this.setState({
+      tab: cur,
+    });
+
     if(cur === 'professional'){
       this.professional(goods_id, inspector_id, item_id, bind_id);
+      window.wx.onMenuShareTimeline({
+        title: '来自基因的小秘密，你也得看看', 
+        link: newUrl, 
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        success: function () {},
+        cancel: function () {},
+      });
+
+      window.wx.onMenuShareAppMessage({
+        title: '来自基因的小秘密，你也得看看', 
+        desc: '', 
+        link: newUrl, 
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        type: 'link', // 分享类型,music、video或link，不填默认为link
+        dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+        success: function () {},
+        cancel: function () {},
+      });
+
+      window.wx.onMenuShareQQ({
+        title: '来自基因的小秘密，你也得看看', 
+        desc: '', 
+        link: newUrl, // 分享链接
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        success: function () {},
+        cancel: function () {},
+      });
+
+      window.wx.onMenuShareWeibo({
+        title: '来自基因的小秘密，你也得看看', 
+        desc: '', 
+        link: newUrl, // 分享链接
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        success: function () {},
+        cancel: function () {},
+      });
+
+      window.wx.onMenuShareQZone({
+        title: '来自基因的小秘密，你也得看看', 
+        desc: '', 
+        link: newUrl, // 分享链接
+        imgUrl: 'http://www.minigene.net/assets/img/logo2.png', 
+        success: function () {},
+        cancel: function () {},
+      });
     }else if(cur === 'imageText'){
       this.imageText(goods_id, inspector_id, item_id, bind_id);
     }
@@ -228,14 +326,6 @@ class ReportDetail extends PureComponent {
       showImgStatus : false,
     })
   }
-  // buy = ()=>{
-  //   const { goods_id } = this.state;
-  //   if(goods_id){
-  //     this.props.router.push('/buy/null/'+goods_id);
-  //   }else{
-  //     this.props.router.push('/buy/');
-  //   }
-  // }
   onSelect = (opt) => {
     const {goods_id, inspector_id, item_id, bind_id ,caseList , tab } = this.state;
     let num = 0;
@@ -252,7 +342,6 @@ class ReportDetail extends PureComponent {
       item_id: opt.props.value,
       nextTitle: caseList[num+1 >= length ? 0 : num+1].item_name,
     });
-
     if(tab === 'professional'){
       this.professional(goods_id, inspector_id, opt.props.value, bind_id)
     }else if(tab === 'imageText'){
@@ -426,7 +515,7 @@ class ReportDetail extends PureComponent {
             <span onClick={this.buy}>立即购买</span>
           </div>
         </div>
-        <div className="result-content result-fail" style={{display:(item_status !== 1 && submitting ?'block':'none'),height:document.documentElement.clientHeight-height-20}}>
+        <div className="result-content result-fail" style={{display:(item_status === 0  && submitting ?'block':'none'),height:document.documentElement.clientHeight-height-20}}>
           <div>
             <p>
               因DNA浓度过低，本项目检测失败...稍后客<br/>服会联系您，请先浏览其他项目报告。
